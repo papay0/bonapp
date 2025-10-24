@@ -20,7 +20,7 @@ export default function HomeLayout({
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-emerald-50/30 to-amber-50/30">
       <Header />
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-3 md:px-4 py-4 md:py-6">
         {children}
       </main>
     </div>

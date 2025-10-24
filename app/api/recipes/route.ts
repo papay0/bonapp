@@ -39,11 +39,18 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, description, links = [], tags = [] } = body;
+    const { title, description, links = [], tags = [], servings } = body;
 
     if (!title || !description) {
       return NextResponse.json(
         { error: 'Title and description are required' },
+        { status: 400 }
+      );
+    }
+
+    if (!servings || servings < 1) {
+      return NextResponse.json(
+        { error: 'Servings must be at least 1' },
         { status: 400 }
       );
     }
@@ -56,6 +63,7 @@ export async function POST(request: NextRequest) {
         description,
         links,
         tags,
+        servings,
       })
       .select()
       .single();

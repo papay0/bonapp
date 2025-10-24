@@ -21,6 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function HomePage() {
   const [currentWeek, setCurrentWeek] = useState(getWeekStart());
@@ -35,7 +36,7 @@ export default function HomePage() {
   const weekStartISO = formatISODate(currentWeek);
 
   // Fetch recipes
-  const { data: recipes = [] } = useQuery<Recipe[]>({
+  const { data: recipes = [], isLoading: isLoadingRecipes } = useQuery<Recipe[]>({
     queryKey: ['recipes'],
     queryFn: async () => {
       const res = await fetch('/api/recipes');
@@ -45,7 +46,7 @@ export default function HomePage() {
   });
 
   // Fetch meal plans for current week
-  const { data: mealPlans = [] } = useQuery<MealPlan[]>({
+  const { data: mealPlans = [], isLoading: isLoadingMealPlans } = useQuery<MealPlan[]>({
     queryKey: ['meal-plans', weekStartISO],
     queryFn: async () => {
       const res = await fetch(`/api/meal-plans?week_start=${weekStartISO}`);
@@ -53,6 +54,8 @@ export default function HomePage() {
       return res.json();
     },
   });
+
+  const isLoading = isLoadingRecipes || isLoadingMealPlans;
 
   // Add meal plan mutation
   const addMealPlan = useMutation({
@@ -144,61 +147,56 @@ export default function HomePage() {
     : 0;
 
   return (
-    <div className="space-y-6">
+    <>
+      {/* Floating Action Button (Mobile Only) */}
+      <Link
+        href="/home/recipes/new"
+        className="lg:hidden fixed bottom-6 right-6 z-40 bg-gradient-to-r from-amber-500 to-orange-500 text-white p-4 rounded-full shadow-2xl hover:shadow-3xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center group"
+      >
+        <ChefHat className="h-6 w-6 group-hover:rotate-12 transition-transform" />
+      </Link>
+
+      <div className="space-y-4 md:space-y-6">
         {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="border-emerald-200 bg-gradient-to-br from-white to-emerald-50/50 shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-700">
-                Total Recipes
-              </CardTitle>
-              <BookOpen className="h-5 w-5 text-emerald-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-emerald-700">{totalRecipes}</div>
-              <p className="text-xs text-gray-600 mt-1 mb-3">
-                {totalRecipes === 0 ? 'Create your first recipe!' : 'Ready to plan'}
-              </p>
-              <Button asChild size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700">
-                <Link href="/home/recipes/new">
-                  <ChefHat className="h-4 w-4 mr-1" />
-                  New Recipe
-                </Link>
-              </Button>
+        <div className="grid grid-cols-3 gap-2 md:gap-3">
+          <Card className="border-0 bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg hover:shadow-xl transition-all hover:scale-105 overflow-hidden">
+            <CardContent className="p-3 md:p-4">
+              <div className="flex items-start justify-between mb-1">
+                <div className="text-[10px] md:text-xs font-semibold text-white/80 uppercase tracking-wide">Recipes</div>
+                <BookOpen className="h-3 w-3 md:h-4 md:w-4 text-white/60" />
+              </div>
+              <div className="text-2xl md:text-3xl font-black text-white">{totalRecipes}</div>
             </CardContent>
           </Card>
 
-          <Card className="border-amber-200 bg-gradient-to-br from-white to-amber-50/50 shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-700">
-                This Week
-              </CardTitle>
-              <Utensils className="h-5 w-5 text-amber-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-amber-700">
+          <Card className="border-0 bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg hover:shadow-xl transition-all hover:scale-105 overflow-hidden">
+            <CardContent className="p-3 md:p-4">
+              <div className="flex items-start justify-between mb-1">
+                <div className="text-[10px] md:text-xs font-semibold text-white/80 uppercase tracking-wide">Week</div>
+                <Utensils className="h-3 w-3 md:h-4 md:w-4 text-white/60" />
+              </div>
+              <div className="text-2xl md:text-3xl font-black text-white">
                 {mealsPlannedThisWeek}/{totalMealSlots}
               </div>
-              <p className="text-xs text-gray-600 mt-1">
-                Meals planned
-              </p>
             </CardContent>
           </Card>
 
-          <Card className="border-emerald-200 bg-gradient-to-br from-white to-emerald-50/50 shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-700">
-                Completion
-              </CardTitle>
-              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-emerald-700">{completionPercentage}%</div>
-              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                <div
-                  className="bg-emerald-600 h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${completionPercentage}%` }}
-                />
+          <Card className="border-0 bg-gradient-to-br from-violet-500 to-purple-500 shadow-lg hover:shadow-xl transition-all hover:scale-105 overflow-hidden">
+            <CardContent className="p-3 md:p-4">
+              <div className="flex items-start justify-between mb-1">
+                <div className="text-[10px] md:text-xs font-semibold text-white/80 uppercase tracking-wide">Done</div>
+                <CheckCircle2 className="h-3 w-3 md:h-4 md:w-4 text-white/60" />
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="text-2xl md:text-3xl font-black text-white">{completionPercentage}%</div>
+                <div className="flex-1">
+                  <div className="w-full bg-white/30 rounded-full h-1.5">
+                    <div
+                      className="bg-white h-1.5 rounded-full transition-all duration-700 ease-out"
+                      style={{ width: `${completionPercentage}%` }}
+                    />
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -356,5 +354,6 @@ export default function HomePage() {
         </DialogContent>
       </Dialog>
     </div>
+    </>
   );
 }

@@ -150,8 +150,11 @@ export default function NewRecipePage() {
                 type="number"
                 min="1"
                 max="20"
-                value={aiServings}
-                onChange={(e) => setAiServings(parseInt(e.target.value))}
+                value={aiServings || ''}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value);
+                  setAiServings(isNaN(val) ? 0 : val);
+                }}
                 className="mt-1.5"
                 disabled={isGenerating}
               />
@@ -205,8 +208,11 @@ export default function NewRecipePage() {
             id="servings"
             min="1"
             max="20"
-            value={servings}
-            onChange={(e) => setServings(parseInt(e.target.value))}
+            value={servings || ''}
+            onChange={(e) => {
+              const val = parseInt(e.target.value);
+              setServings(isNaN(val) ? 0 : val);
+            }}
             required
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />

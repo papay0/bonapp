@@ -48,13 +48,14 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { title, description, links, tags } = body;
+    const { title, description, links, tags, servings } = body;
 
     const updates: any = {};
     if (title !== undefined) updates.title = title;
     if (description !== undefined) updates.description = description;
     if (links !== undefined) updates.links = links;
     if (tags !== undefined) updates.tags = tags;
+    if (servings !== undefined) updates.servings = servings;
 
     const { data: recipe, error } = await (supabaseServer as any)
       .from('recipes')

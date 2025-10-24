@@ -5,7 +5,7 @@ import { MealPlan, Recipe } from '@/lib/supabase/types';
 import { Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { format, startOfWeek, addDays, addWeeks } from 'date-fns';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { formatISODate } from '@/lib/utils/date';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -13,6 +13,7 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 export default function CalendarPage() {
   const today = useMemo(() => new Date(), []);
   const [numberOfWeeks] = useState(12); // Show 12 weeks total
+  const currentWeekRef = useRef<HTMLDivElement>(null);
 
   // Calculate weeks to display (6 past + current + 5 future)
   const weeks = useMemo(() => {
@@ -62,6 +63,16 @@ export default function CalendarPage() {
     );
   };
 
+  // Scroll to current week on mount
+  useEffect(() => {
+    if (currentWeekRef.current && !isLoading) {
+      currentWeekRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
+  }, [isLoading]);
+
   return (
     <>
       <div className="mb-8">
@@ -88,6 +99,7 @@ export default function CalendarPage() {
               return (
                 <div
                   key={weekIndex}
+                  ref={isCurrentWeek ? currentWeekRef : null}
                   className={`bg-white rounded-lg shadow-sm overflow-hidden border-2 ${
                     isCurrentWeek ? 'border-emerald-400' : 'border-transparent'
                   }`}

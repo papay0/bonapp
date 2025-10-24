@@ -158,55 +158,59 @@ export default function RecipeDetailPage({
   return (
     <div className="max-w-4xl mx-auto">
       {/* Header Section */}
-      <div className="mb-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <h1 className="text-4xl font-bold text-gray-900 mb-3">{recipe.title}</h1>
-            <div className="flex flex-wrap items-center gap-3 mb-2">
-              <Badge variant="outline" className="flex items-center gap-1.5 px-3 py-1 text-sm font-medium border-amber-300 bg-amber-50 text-amber-700">
-                <Users className="h-4 w-4" />
-                Serves {recipe.servings} {recipe.servings === 1 ? 'person' : 'people'}
-              </Badge>
-            </div>
-            {recipe.tags && recipe.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {recipe.tags.map((tag) => (
-                  <Badge key={tag} className="bg-emerald-100 text-emerald-700 border-emerald-300">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
+      <div className="mb-8">
+        {/* Title and Delete Button */}
+        <div className="flex items-start justify-between gap-4 mb-6">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 flex-1">{recipe.title}</h1>
           <Button
             variant="destructive"
             onClick={handleDelete}
             disabled={deleteRecipe.isPending}
+            className="shrink-0"
           >
             <Trash2 className="h-4 w-4 mr-2" />
             Delete
           </Button>
         </div>
 
+        {/* Metadata */}
+        <div className="space-y-3 mb-6">
+          <div className="flex flex-wrap items-center gap-3">
+            <Badge variant="outline" className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border-amber-300 bg-amber-50 text-amber-700">
+              <Users className="h-4 w-4" />
+              Serves {recipe.servings} {recipe.servings === 1 ? 'person' : 'people'}
+            </Badge>
+          </div>
+          {recipe.tags && recipe.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {recipe.tags.map((tag) => (
+                <Badge key={tag} className="bg-emerald-100 text-emerald-700 border-emerald-300 px-3 py-1">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Tabs */}
         <div className="border-b border-gray-200">
-          <div className="flex gap-6">
+          <div className="flex gap-8 justify-center md:justify-start">
             <button
               onClick={() => setActiveTab('view')}
-              className={`pb-3 px-1 font-medium transition-colors border-b-2 ${
+              className={`pb-4 px-4 font-semibold text-base transition-all border-b-2 ${
                 activeTab === 'view'
                   ? 'text-emerald-600 border-emerald-600'
-                  : 'text-gray-500 border-transparent hover:text-gray-700'
+                  : 'text-gray-500 border-transparent hover:text-emerald-600 hover:border-gray-300'
               }`}
             >
               View
             </button>
             <button
               onClick={() => setActiveTab('edit')}
-              className={`pb-3 px-1 font-medium transition-colors border-b-2 ${
+              className={`pb-4 px-4 font-semibold text-base transition-all border-b-2 ${
                 activeTab === 'edit'
                   ? 'text-emerald-600 border-emerald-600'
-                  : 'text-gray-500 border-transparent hover:text-gray-700'
+                  : 'text-gray-500 border-transparent hover:text-emerald-600 hover:border-gray-300'
               }`}
             >
               Edit
@@ -291,8 +295,11 @@ export default function RecipeDetailPage({
                 type="number"
                 min="1"
                 max="20"
-                value={servings}
-                onChange={(e) => setServings(parseInt(e.target.value))}
+                value={servings || ''}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value);
+                  setServings(isNaN(val) ? 0 : val);
+                }}
                 required
               />
             </div>
