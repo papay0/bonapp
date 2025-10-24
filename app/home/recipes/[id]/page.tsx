@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function RecipeDetailPage({
   params,
@@ -133,8 +134,56 @@ export default function RecipeDetailPage({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600">Loading recipe...</div>
+      <div className="max-w-4xl mx-auto">
+        {/* Header Section - Loading */}
+        <div className="mb-8">
+          {/* Title and Delete Button */}
+          <div className="flex items-start justify-between gap-4 mb-6">
+            <Skeleton className="h-10 w-2/3" />
+            <Skeleton className="h-10 w-24" />
+          </div>
+
+          {/* Metadata */}
+          <div className="space-y-3 mb-6">
+            <Skeleton className="h-8 w-32" />
+            <div className="flex flex-wrap gap-2">
+              <Skeleton className="h-7 w-20 rounded-full" />
+              <Skeleton className="h-7 w-24 rounded-full" />
+              <Skeleton className="h-7 w-16 rounded-full" />
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="border-b border-gray-200">
+            <div className="flex gap-8 justify-center md:justify-start">
+              <Skeleton className="h-12 w-16" />
+              <Skeleton className="h-12 w-16" />
+            </div>
+          </div>
+        </div>
+
+        {/* Content Section - Loading */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="space-y-4">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-4/5" />
+            <div className="pt-4">
+              <Skeleton className="h-6 w-40 mb-3" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+            <div className="pt-4">
+              <Skeleton className="h-6 w-32 mb-3" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

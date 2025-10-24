@@ -1,16 +1,69 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ChefHat, Trash2, AlertTriangle, Database, RefreshCw } from 'lucide-react';
+import { ChefHat, Trash2, AlertTriangle, Database, RefreshCw, Shield, Lock, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { Brand } from '@/lib/brand';
 import { useUser } from '@clerk/nextjs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function AdminPage() {
   const { user } = useUser();
   const queryClient = useQueryClient();
   const [confirmDelete, setConfirmDelete] = useState('');
+
+  // Password protection state
+  const [password, setPassword] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check if already authenticated on mount
+  useEffect(() => {
+    const authenticated = sessionStorage.getItem('admin_authenticated');
+    if (authenticated === 'true') {
+      setIsAuthenticated(true);
+    }
+    setIsLoading(false);
+  }, []);
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/admin/verify-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+
+      if (response.ok) {
+        setIsAuthenticated(true);
+        sessionStorage.setItem('admin_authenticated', 'true');
+      } else {
+        setError('Incorrect password. Access denied.');
+        setPassword('');
+      }
+    } catch (error) {
+      console.error('Password verification error:', error);
+      setError('Failed to verify password. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    sessionStorage.removeItem('admin_authenticated');
+    setPassword('');
+  };
 
   // Flush all recipes
   const flushRecipes = useMutation({
@@ -61,34 +114,92 @@ export default function AdminPage() {
     },
   });
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/home" className="flex items-center gap-2">
-              <ChefHat className="h-8 w-8 text-emerald-600" />
-              <span className="text-2xl font-bold text-gray-900">{Brand.name}</span>
-            </Link>
-            <Link
-              href="/home"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Back to Home
-            </Link>
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-gray-600">Loading...</div>
+      </div>
+    );
+  }
+
+  // Password protection screen
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-[70vh]">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-amber-200">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-8 py-10 text-center">
+              <div className="flex justify-center mb-6">
+                <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full">
+                  <Shield className="h-10 w-10 text-white" />
+                </div>
+              </div>
+              <h1 className="text-3xl font-black text-white mb-2">Admin Access</h1>
+              <p className="text-white/90 text-sm">Enter password to continue</p>
+            </div>
+
+            {/* Form */}
+            <div className="p-8">
+              <form onSubmit={handlePasswordSubmit} className="space-y-6">
+                {/* Password Field */}
+                <div className="space-y-2">
+                  <label htmlFor="password" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                    <Lock className="h-4 w-4" />
+                    Password
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter admin password"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all text-base"
+                    autoFocus
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+
+                {/* Error Message */}
+                {error && (
+                  <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4">
+                    <p className="text-red-700 text-sm font-medium">{error}</p>
+                  </div>
+                )}
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-base"
+                >
+                  {isLoading ? 'Verifying...' : 'Unlock Admin Panel'}
+                </button>
+              </form>
+            </div>
           </div>
         </div>
-      </header>
+      </div>
+    );
+  }
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-8">
+  // Admin panel (authenticated)
+  return (
+    <div className="max-w-4xl mx-auto">
+      <div className="flex items-center justify-between mb-8">
+        <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Panel</h1>
           <p className="text-gray-600">
             Database management and maintenance tools
           </p>
         </div>
+        <Button onClick={handleLogout} variant="outline" className="gap-2">
+          <LogOut className="h-4 w-4" />
+          Logout
+        </Button>
+      </div>
 
         {/* User Info */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
@@ -216,7 +327,6 @@ export default function AdminPage() {
             </div>
           </div>
         </div>
-      </main>
     </div>
   );
 }

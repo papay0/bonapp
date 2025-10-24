@@ -7,6 +7,8 @@ import { Plus, ChefHat } from 'lucide-react';
 import Link from 'next/link';
 import { Brand } from '@/lib/brand';
 import { UserButton } from '@clerk/nextjs';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function RecipesPage() {
   const { data: recipes = [], isLoading } = useQuery<Recipe[]>({
@@ -37,8 +39,28 @@ export default function RecipesPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-12">
-          <div className="text-gray-600">Loading recipes...</div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Card key={i} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-3">
+                  <Skeleton className="h-7 w-3/4" />
+                  <Skeleton className="h-5 w-5 rounded-full" />
+                </div>
+                <Skeleton className="h-4 w-20 mb-4" />
+                <div className="space-y-2 mb-4">
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-2/3" />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Skeleton className="h-6 w-16 rounded-full" />
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                  <Skeleton className="h-6 w-14 rounded-full" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       ) : recipes.length === 0 ? (
         <div className="text-center py-16">
