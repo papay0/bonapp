@@ -5,7 +5,16 @@ import { useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { Brand } from '@/lib/brand';
-import { ChefHat, Calendar, BookOpen, ArrowRight } from 'lucide-react';
+import { ChefHat, ArrowRight, Sparkles } from 'lucide-react';
+
+// Example meal data for the visual preview
+const exampleWeek = [
+  { day: 'Mon', lunch: 'Chicken Caesar Salad', dinner: 'Spaghetti Carbonara' },
+  { day: 'Tue', lunch: 'Quinoa Buddha Bowl', dinner: 'Grilled Salmon' },
+  { day: 'Wed', lunch: 'Turkey Sandwich', dinner: 'Beef Tacos' },
+  { day: 'Thu', lunch: 'Greek Salad', dinner: 'Chicken Curry' },
+  { day: 'Fri', lunch: 'Veggie Wrap', dinner: 'Homemade Pizza' },
+];
 
 export default function LandingPage() {
   const { isSignedIn, isLoaded } = useUser();
@@ -21,7 +30,7 @@ export default function LandingPage() {
   // Show loading state while checking authentication
   if (!isLoaded) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-teal-50">
         <div className="text-gray-600">Loading...</div>
       </div>
     );
@@ -33,24 +42,26 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-amber-50">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50">
       {/* Header */}
       <header className="container mx-auto px-4 py-6">
         <nav className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ChefHat className="h-8 w-8 text-emerald-600" />
-            <span className="text-2xl font-bold text-gray-900">{Brand.name}</span>
+            <div className="bg-gradient-to-br from-emerald-500 to-teal-500 p-2 rounded-xl shadow-md">
+              <ChefHat className="h-6 w-6 text-white" />
+            </div>
+            <span className="text-2xl font-black text-gray-900">{Brand.name}</span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Link
               href="/sign-in"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
+              className="hidden sm:block text-gray-600 hover:text-gray-900 transition-colors font-medium"
             >
               Sign In
             </Link>
             <Link
               href="/sign-up"
-              className="px-6 py-2 bg-emerald-600 text-white rounded-full hover:bg-emerald-700 transition-colors"
+              className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-full hover:from-emerald-700 hover:to-teal-700 transition-all shadow-md hover:shadow-lg font-semibold text-sm"
             >
               Get Started
             </Link>
@@ -58,88 +69,168 @@ export default function LandingPage() {
         </nav>
       </header>
 
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 md:py-32">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-            {Brand.tagline}
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            {Brand.description}. Create recipes, plan your meals, and never wonder "what's for dinner?" again.
-          </p>
-          <Link
-            href="/sign-up"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-emerald-600 text-white text-lg font-semibold rounded-full hover:bg-emerald-700 transition-colors shadow-lg hover:shadow-xl"
-          >
-            Start Planning Free
-            <ArrowRight className="h-5 w-5" />
-          </Link>
+      {/* Hero Section with Visual Preview */}
+      <section className="container mx-auto px-4 py-12 md:py-20">
+        <div className="max-w-6xl mx-auto">
+          {/* Headline */}
+          <div className="text-center mb-12 md:mb-16">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-gray-900 mb-4 md:mb-6 leading-tight">
+              {Brand.tagline}
+            </h1>
+            <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+              See your week at a glance. Plan meals visually. Eat better.
+            </p>
+          </div>
+
+          {/* Visual Meal Planner Preview */}
+          <div className="bg-white rounded-3xl shadow-2xl p-4 md:p-8 mb-8 border-4 border-emerald-100">
+            {/* Week Header */}
+            <div className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-2xl p-4 md:p-6 mb-6 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+              <h2 className="text-xl md:text-2xl font-black text-white text-center drop-shadow-md relative z-10">
+                Your Week — January 20-26, 2025
+              </h2>
+            </div>
+
+            {/* Meal Grid - Desktop */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b-2 border-gray-200">
+                    <th className="text-left p-3 text-sm font-bold text-gray-500 uppercase tracking-wide">Day</th>
+                    <th className="text-left p-3 text-sm font-bold text-gray-500 uppercase tracking-wide">Lunch</th>
+                    <th className="text-left p-3 text-sm font-bold text-gray-500 uppercase tracking-wide">Dinner</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {exampleWeek.map((day, index) => (
+                    <tr key={day.day} className="border-b border-gray-100 hover:bg-emerald-50/50 transition-colors group">
+                      <td className="p-3">
+                        <div className="font-bold text-gray-900">{day.day}</div>
+                      </td>
+                      <td className="p-3">
+                        <div className="bg-gradient-to-br from-amber-500 to-orange-500 text-white rounded-xl p-3 shadow-md hover:shadow-xl transition-all hover:scale-105 cursor-pointer">
+                          <div className="font-semibold text-sm drop-shadow">{day.lunch}</div>
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <div className="bg-gradient-to-br from-emerald-500 to-teal-500 text-white rounded-xl p-3 shadow-md hover:shadow-xl transition-all hover:scale-105 cursor-pointer">
+                          <div className="font-semibold text-sm drop-shadow">{day.dinner}</div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Meal Grid - Mobile */}
+            <div className="md:hidden space-y-4">
+              {exampleWeek.map((day) => (
+                <div key={day.day} className="bg-gray-50 rounded-2xl p-4 border-2 border-gray-100">
+                  <div className="font-bold text-lg text-gray-900 mb-3">{day.day}</div>
+                  <div className="space-y-2">
+                    <div>
+                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Lunch</div>
+                      <div className="bg-gradient-to-br from-amber-500 to-orange-500 text-white rounded-lg p-3 shadow-md">
+                        <div className="font-semibold text-sm drop-shadow">{day.lunch}</div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Dinner</div>
+                      <div className="bg-gradient-to-br from-emerald-500 to-teal-500 text-white rounded-lg p-3 shadow-md">
+                        <div className="font-semibold text-sm drop-shadow">{day.dinner}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA Button */}
+          <div className="text-center">
+            <Link
+              href="/sign-up"
+              className="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-lg md:text-xl font-bold rounded-full hover:from-emerald-700 hover:to-teal-700 transition-all shadow-2xl hover:shadow-3xl hover:scale-105 active:scale-95"
+            >
+              Start Planning Your Week
+              <ArrowRight className="h-6 w-6" />
+            </Link>
+            <p className="text-sm text-gray-500 mt-4">Free forever • No credit card required</p>
+          </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
-              <Calendar className="h-6 w-6 text-emerald-600" />
+      {/* AI Feature Highlight */}
+      <section className="container mx-auto px-4 py-16 md:py-24">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-3xl p-8 md:p-12 text-center text-white shadow-2xl relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+            <div className="relative z-10">
+              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
+                <Sparkles className="h-5 w-5 text-yellow-300" />
+                <span className="text-sm font-bold">AI-Powered</span>
+              </div>
+              <h2 className="text-3xl md:text-5xl font-black mb-4 drop-shadow-lg">
+                Generate Recipes with AI
+              </h2>
+              <p className="text-lg md:text-xl opacity-95 mb-8 max-w-2xl mx-auto">
+                Just type what you want to eat. Our AI instantly creates detailed recipes with ingredients, steps, and cooking tips.
+              </p>
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 max-w-md mx-auto border-2 border-white/20">
+                <div className="text-left space-y-2 font-mono text-sm">
+                  <div className="text-yellow-300 font-semibold">You type:</div>
+                  <div className="bg-white/20 rounded-lg px-4 py-3 backdrop-blur-sm">"carbonara pasta"</div>
+                  <div className="text-yellow-300 font-semibold mt-4">AI generates:</div>
+                  <div className="bg-white/20 rounded-lg px-4 py-3 backdrop-blur-sm">✨ Complete recipe with ingredients & steps</div>
+                </div>
+              </div>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Weekly Planner
-            </h3>
-            <p className="text-gray-600">
-              Organize your meals for the entire week with our intuitive calendar view. Drag and drop recipes into your weekly schedule.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mb-4">
-              <BookOpen className="h-6 w-6 text-amber-600" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Recipe Collection
-            </h3>
-            <p className="text-gray-600">
-              Create and store your favorite recipes with rich Markdown formatting. Add links, tags, and detailed instructions.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mb-4">
-              <ChefHat className="h-6 w-6 text-rose-600" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Easy Navigation
-            </h3>
-            <p className="text-gray-600">
-              Browse through weeks like a timeline. See your meal history and plan ahead with our calendar view.
-            </p>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="max-w-4xl mx-auto bg-gradient-to-r from-emerald-600 to-amber-600 rounded-3xl p-12 text-center text-white">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Ready to simplify your meal planning?
+      {/* Simple Feature Cards */}
+      <section className="container mx-auto px-4 py-16 md:py-24">
+        <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-6">
+          <div className="text-center p-8">
+            <div className="text-5xl mb-4">📅</div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Visual Planning</h3>
+            <p className="text-gray-600">See your entire week in one beautiful view</p>
+          </div>
+          <div className="text-center p-8">
+            <div className="text-5xl mb-4">🤖</div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">AI Recipes</h3>
+            <p className="text-gray-600">Generate any recipe instantly with AI</p>
+          </div>
+          <div className="text-center p-8">
+            <div className="text-5xl mb-4">📱</div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Mobile First</h3>
+            <p className="text-gray-600">Beautiful on every device</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="container mx-auto px-4 py-16 md:py-24">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl md:text-5xl font-black text-gray-900 mb-6">
+            Stop Wondering.<br />Start Planning.
           </h2>
-          <p className="text-xl mb-8 opacity-90">
-            Join BonApp today and start planning delicious meals for your week.
-          </p>
           <Link
             href="/sign-up"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-white text-emerald-600 text-lg font-semibold rounded-full hover:bg-gray-50 transition-colors shadow-lg"
+            className="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-lg md:text-xl font-bold rounded-full hover:from-emerald-700 hover:to-teal-700 transition-all shadow-2xl hover:shadow-3xl hover:scale-105 active:scale-95"
           >
-            Get Started Now
-            <ArrowRight className="h-5 w-5" />
+            Get Started Free
+            <ArrowRight className="h-6 w-6" />
           </Link>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="container mx-auto px-4 py-12 border-t border-gray-200">
-        <div className="text-center text-gray-600">
+        <div className="text-center text-gray-600 text-sm">
           <p>&copy; 2025 {Brand.name}. Built with Next.js, Clerk, and Supabase.</p>
         </div>
       </footer>
