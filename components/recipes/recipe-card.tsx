@@ -1,7 +1,7 @@
 'use client';
 
 import { Recipe } from '@/lib/supabase/types';
-import { ExternalLink, Tag } from 'lucide-react';
+import { ExternalLink, Tag, Users } from 'lucide-react';
 import Link from 'next/link';
 
 interface RecipeCardProps {
@@ -26,6 +26,12 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
         <p className="text-sm text-gray-600 line-clamp-2">
           {recipe.description.split('\n')[0].replace(/^#+ /, '')}
         </p>
+
+        {/* Servings */}
+        <div className="flex items-center gap-1.5 text-sm text-amber-700">
+          <Users className="h-4 w-4" />
+          <span>Serves {recipe.servings}</span>
+        </div>
 
         {/* Tags */}
         {recipe.tags && recipe.tags.length > 0 && (

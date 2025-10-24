@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, use } from 'react';
+import { useState, use, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Recipe } from '@/lib/supabase/types';
 import { MarkdownEditor } from '@/components/recipes/markdown-editor';
-import { Save, Trash2, ExternalLink } from 'lucide-react';
+import { Save, Trash2, ExternalLink, Users } from 'lucide-react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -31,6 +31,7 @@ export default function RecipeDetailPage({
   const [description, setDescription] = useState('');
   const [links, setLinks] = useState<string>('');
   const [tags, setTags] = useState<string>('');
+  const [servings, setServings] = useState<number>(0);
 
   // Fetch recipe
   const { data: recipe, isLoading } = useQuery<Recipe>({
@@ -44,7 +45,7 @@ export default function RecipeDetailPage({
   });
 
   // Initialize form when recipe loads
-  useState(() => {
+  useEffect(() => {
     if (recipe) {
       setTitle(recipe.title);
       setDescription(recipe.description);
@@ -55,8 +56,9 @@ export default function RecipeDetailPage({
           : ''
       );
       setTags(recipe.tags ? recipe.tags.join(', ') : '');
+      setServings(recipe.servings);
     }
-  });
+  }, [recipe]);
 
   // Update recipe mutation
   const updateRecipe = useMutation({
@@ -65,6 +67,7 @@ export default function RecipeDetailPage({
       description: string;
       links: { url: string }[];
       tags: string[];
+      servings: number;
     }) => {
       const res = await fetch(`/api/recipes/${id}`, {
         method: 'PATCH',
@@ -118,6 +121,7 @@ export default function RecipeDetailPage({
       description,
       links: parsedLinks,
       tags: parsedTags,
+      servings,
     });
   };
 
@@ -158,6 +162,12 @@ export default function RecipeDetailPage({
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <h1 className="text-4xl font-bold text-gray-900 mb-3">{recipe.title}</h1>
+            <div className="flex flex-wrap items-center gap-3 mb-2">
+              <Badge variant="outline" className="flex items-center gap-1.5 px-3 py-1 text-sm font-medium border-amber-300 bg-amber-50 text-amber-700">
+                <Users className="h-4 w-4" />
+                Serves {recipe.servings} {recipe.servings === 1 ? 'person' : 'people'}
+              </Badge>
+            </div>
             {recipe.tags && recipe.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {recipe.tags.map((tag) => (
@@ -270,6 +280,20 @@ export default function RecipeDetailPage({
                 onChange={(e) => setTitle(e.target.value)}
                 required
                 placeholder="Enter recipe title"
+              />
+            </div>
+
+            {/* Servings */}
+            <div className="space-y-2">
+              <Label htmlFor="servings">Number of Servings *</Label>
+              <Input
+                id="servings"
+                type="number"
+                min="1"
+                max="20"
+                value={servings}
+                onChange={(e) => setServings(parseInt(e.target.value))}
+                required
               />
             </div>
 

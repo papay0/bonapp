@@ -39,6 +39,7 @@ export interface Database {
           description: string;
           links: Json;
           tags: string[] | null;
+          servings: number;
           created_at: string;
         };
         Insert: {
@@ -48,6 +49,7 @@ export interface Database {
           description: string;
           links?: Json;
           tags?: string[] | null;
+          servings?: number;
           created_at?: string;
         };
         Update: {
@@ -57,6 +59,7 @@ export interface Database {
           description?: string;
           links?: Json;
           tags?: string[] | null;
+          servings?: number;
           created_at?: string;
         };
       };

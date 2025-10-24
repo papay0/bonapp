@@ -6,7 +6,7 @@ import { WeekView } from '@/components/meal-planner/week-view';
 import { MealType, Recipe, MealPlan } from '@/lib/supabase/types';
 import { getWeekStart, formatISODate } from '@/lib/utils/date';
 import { addWeeks } from 'date-fns';
-import { ChefHat, BookOpen, Calendar, TrendingUp, Utensils, CheckCircle2, X, Search } from 'lucide-react';
+import { ChefHat, BookOpen, Calendar, TrendingUp, Utensils, CheckCircle2, X, Search, Users } from 'lucide-react';
 import Link from 'next/link';
 import { Brand } from '@/lib/brand';
 import { UserButton } from '@clerk/nextjs';
@@ -156,9 +156,15 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-emerald-700">{totalRecipes}</div>
-              <p className="text-xs text-gray-600 mt-1">
+              <p className="text-xs text-gray-600 mt-1 mb-3">
                 {totalRecipes === 0 ? 'Create your first recipe!' : 'Ready to plan'}
               </p>
+              <Button asChild size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700">
+                <Link href="/home/recipes/new">
+                  <ChefHat className="h-4 w-4 mr-1" />
+                  New Recipe
+                </Link>
+              </Button>
             </CardContent>
           </Card>
 
@@ -263,6 +269,10 @@ export default function HomePage() {
                     <h3 className="font-semibold text-gray-900 text-lg group-hover:text-emerald-700 transition-colors">
                       {recipe.title}
                     </h3>
+                    <div className="flex items-center gap-1.5 text-sm text-amber-700 mt-2">
+                      <Users className="h-4 w-4" />
+                      <span>Serves {recipe.servings}</span>
+                    </div>
                     {recipe.description && (
                       <p className="text-sm text-gray-600 mt-1 line-clamp-2">
                         {recipe.description.substring(0, 120)}...

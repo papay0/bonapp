@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChefHat } from 'lucide-react';
+import { ChefHat, Plus } from 'lucide-react';
 import { Brand } from '@/lib/brand';
 import { UserButton } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
@@ -49,6 +49,17 @@ export function Header() {
               className={isActive('/home/calendar') ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
             >
               <Link href="/home/calendar">Calendar</Link>
+            </Button>
+            <div className="h-6 w-px bg-gray-300 mx-1" />
+            <Button
+              variant="outline"
+              asChild
+              className="border-emerald-600 text-emerald-600 hover:bg-emerald-50"
+            >
+              <Link href="/home/recipes/new">
+                <Plus className="h-4 w-4 mr-1" />
+                New Recipe
+              </Link>
             </Button>
             <UserButton afterSignOutUrl="/" />
           </div>
