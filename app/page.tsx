@@ -1,20 +1,21 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { Brand } from '@/lib/brand';
 import { ChefHat, ArrowRight, Sparkles } from 'lucide-react';
+import { AIDemoAnimation } from '@/components/landing/ai-demo-animation';
 
 // Example meal data for the visual preview
-const exampleWeek = [
-  { day: 'Mon', lunch: 'Chicken Caesar Salad', dinner: 'Spaghetti Carbonara' },
-  { day: 'Tue', lunch: 'Quinoa Buddha Bowl', dinner: 'Grilled Salmon' },
-  { day: 'Wed', lunch: 'Turkey Sandwich', dinner: 'Beef Tacos' },
-  { day: 'Thu', lunch: 'Greek Salad', dinner: 'Chicken Curry' },
-  { day: 'Fri', lunch: 'Veggie Wrap', dinner: 'Homemade Pizza' },
-];
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const DATES = ['Jan 20', 'Jan 21', 'Jan 22', 'Jan 23', 'Jan 24', 'Jan 25', 'Jan 26'];
+
+const exampleMeals = {
+  lunch: ['Chicken Caesar', 'Quinoa Bowl', 'Turkey Sandwich', 'Greek Salad', 'Veggie Wrap', 'Pasta Salad', 'Sushi Bowl'],
+  dinner: ['Carbonara', 'Grilled Salmon', 'Beef Tacos', 'Chicken Curry', 'Homemade Pizza', 'Stir Fry', 'BBQ Ribs'],
+};
 
 export default function LandingPage() {
   const { isSignedIn, isLoaded } = useUser();
@@ -92,54 +93,100 @@ export default function LandingPage() {
               </h2>
             </div>
 
-            {/* Meal Grid - Desktop */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full">
+            {/* Calendar Grid - Desktop */}
+            <div className="hidden lg:block overflow-hidden rounded-2xl border-2 border-gray-200 shadow-lg">
+              <table className="w-full border-collapse">
                 <thead>
-                  <tr className="border-b-2 border-gray-200">
-                    <th className="text-left p-3 text-sm font-bold text-gray-500 uppercase tracking-wide">Day</th>
-                    <th className="text-left p-3 text-sm font-bold text-gray-500 uppercase tracking-wide">Lunch</th>
-                    <th className="text-left p-3 text-sm font-bold text-gray-500 uppercase tracking-wide">Dinner</th>
+                  <tr className="bg-gradient-to-r from-emerald-100 to-amber-100 border-b-2 border-gray-300">
+                    <th className="w-20 p-3 font-bold text-gray-900 border-r-2 border-gray-300 text-center text-sm">
+                      Meal
+                    </th>
+                    {DAYS.map((day, index) => (
+                      <th key={day} className="p-2 text-center font-bold text-gray-900 border-r-2 last:border-r-0 border-gray-300">
+                        <div className="flex flex-col items-center">
+                          <span className="text-sm font-bold">{day}</span>
+                          <span className="text-xs font-normal text-gray-600">{DATES[index]}</span>
+                        </div>
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {exampleWeek.map((day, index) => (
-                    <tr key={day.day} className="border-b border-gray-100 hover:bg-emerald-50/50 transition-colors group">
-                      <td className="p-3">
-                        <div className="font-bold text-gray-900">{day.day}</div>
+                  {['lunch', 'dinner'].map((mealType) => (
+                    <tr key={mealType} className="hover:bg-gray-50/50 border-b-2 last:border-b-0 border-gray-200">
+                      <td className="font-bold text-gray-700 capitalize bg-gradient-to-r from-gray-50 to-gray-100 border-r-2 border-gray-300 text-center p-0 text-sm">
+                        {mealType}
                       </td>
-                      <td className="p-3">
-                        <div className="bg-gradient-to-br from-amber-500 to-orange-500 text-white rounded-xl p-3 shadow-md hover:shadow-xl transition-all hover:scale-105 cursor-pointer">
-                          <div className="font-semibold text-sm drop-shadow">{day.lunch}</div>
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        <div className="bg-gradient-to-br from-emerald-500 to-teal-500 text-white rounded-xl p-3 shadow-md hover:shadow-xl transition-all hover:scale-105 cursor-pointer">
-                          <div className="font-semibold text-sm drop-shadow">{day.dinner}</div>
-                        </div>
-                      </td>
+                      {DAYS.map((day, dayIndex) => (
+                        <td key={`${mealType}-${day}`} className="p-2 border-r-2 last:border-r-0 border-gray-300">
+                          <div className="bg-gradient-to-br from-emerald-500 to-teal-500 text-white rounded-lg p-2.5 shadow-md hover:shadow-lg transition-all hover:scale-105 cursor-pointer">
+                            <div className="font-semibold text-xs drop-shadow line-clamp-2">
+                              {exampleMeals[mealType as 'lunch' | 'dinner'][dayIndex]}
+                            </div>
+                          </div>
+                        </td>
+                      ))}
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
 
-            {/* Meal Grid - Mobile */}
-            <div className="md:hidden space-y-4">
-              {exampleWeek.map((day) => (
-                <div key={day.day} className="bg-gray-50 rounded-2xl p-4 border-2 border-gray-100">
-                  <div className="font-bold text-lg text-gray-900 mb-3">{day.day}</div>
-                  <div className="space-y-2">
+            {/* Calendar Grid - Tablet */}
+            <div className="hidden md:block lg:hidden overflow-x-auto overflow-hidden rounded-2xl border-2 border-gray-200 shadow-lg">
+              <table className="w-full border-collapse min-w-[700px]">
+                <thead>
+                  <tr className="bg-gradient-to-r from-emerald-100 to-amber-100 border-b-2 border-gray-300">
+                    <th className="w-16 p-2 font-bold text-gray-900 border-r-2 border-gray-300 text-center text-xs">
+                      Meal
+                    </th>
+                    {DAYS.slice(0, 5).map((day, index) => (
+                      <th key={day} className="p-2 text-center font-bold text-gray-900 border-r-2 last:border-r-0 border-gray-300">
+                        <div className="flex flex-col items-center">
+                          <span className="text-xs font-bold">{day.slice(0, 3)}</span>
+                          <span className="text-[10px] font-normal text-gray-600">{DATES[index]}</span>
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {['lunch', 'dinner'].map((mealType) => (
+                    <tr key={mealType} className="border-b-2 last:border-b-0 border-gray-200">
+                      <td className="font-bold text-gray-700 capitalize bg-gradient-to-r from-gray-50 to-gray-100 border-r-2 border-gray-300 text-center p-0 text-xs">
+                        {mealType}
+                      </td>
+                      {DAYS.slice(0, 5).map((day, dayIndex) => (
+                        <td key={`${mealType}-${day}`} className="p-1.5 border-r-2 last:border-r-0 border-gray-300">
+                          <div className="bg-gradient-to-br from-emerald-500 to-teal-500 text-white rounded-lg p-2 shadow-md">
+                            <div className="font-semibold text-[10px] drop-shadow line-clamp-2">
+                              {exampleMeals[mealType as 'lunch' | 'dinner'][dayIndex]}
+                            </div>
+                          </div>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile - Simplified View */}
+            <div className="md:hidden space-y-3">
+              {DAYS.slice(0, 5).map((day, index) => (
+                <div key={day} className="bg-gray-50 rounded-xl p-3 border-2 border-gray-100">
+                  <div className="font-bold text-sm text-gray-900 mb-2">{day} - {DATES[index]}</div>
+                  <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Lunch</div>
-                      <div className="bg-gradient-to-br from-amber-500 to-orange-500 text-white rounded-lg p-3 shadow-md">
-                        <div className="font-semibold text-sm drop-shadow">{day.lunch}</div>
+                      <div className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Lunch</div>
+                      <div className="bg-gradient-to-br from-emerald-500 to-teal-500 text-white rounded-lg p-2 shadow-md">
+                        <div className="font-semibold text-xs drop-shadow">{exampleMeals.lunch[index]}</div>
                       </div>
                     </div>
                     <div>
-                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Dinner</div>
-                      <div className="bg-gradient-to-br from-emerald-500 to-teal-500 text-white rounded-lg p-3 shadow-md">
-                        <div className="font-semibold text-sm drop-shadow">{day.dinner}</div>
+                      <div className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Dinner</div>
+                      <div className="bg-gradient-to-br from-emerald-500 to-teal-500 text-white rounded-lg p-2 shadow-md">
+                        <div className="font-semibold text-xs drop-shadow">{exampleMeals.dinner[index]}</div>
                       </div>
                     </div>
                   </div>
@@ -157,7 +204,6 @@ export default function LandingPage() {
               Start Planning Your Week
               <ArrowRight className="h-6 w-6" />
             </Link>
-            <p className="text-sm text-gray-500 mt-4">Free forever • No credit card required</p>
           </div>
         </div>
       </section>
@@ -178,13 +224,8 @@ export default function LandingPage() {
               <p className="text-lg md:text-xl opacity-95 mb-8 max-w-2xl mx-auto">
                 Just type what you want to eat. Our AI instantly creates detailed recipes with ingredients, steps, and cooking tips.
               </p>
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 max-w-md mx-auto border-2 border-white/20">
-                <div className="text-left space-y-2 font-mono text-sm">
-                  <div className="text-yellow-300 font-semibold">You type:</div>
-                  <div className="bg-white/20 rounded-lg px-4 py-3 backdrop-blur-sm">"carbonara pasta"</div>
-                  <div className="text-yellow-300 font-semibold mt-4">AI generates:</div>
-                  <div className="bg-white/20 rounded-lg px-4 py-3 backdrop-blur-sm">✨ Complete recipe with ingredients & steps</div>
-                </div>
+              <div className="max-w-2xl mx-auto">
+                <AIDemoAnimation />
               </div>
             </div>
           </div>
@@ -231,7 +272,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="container mx-auto px-4 py-12 border-t border-gray-200">
         <div className="text-center text-gray-600 text-sm">
-          <p>&copy; 2025 {Brand.name}. Built with Next.js, Clerk, and Supabase.</p>
+          <p>&copy; 2025 {Brand.name}</p>
         </div>
       </footer>
     </div>
