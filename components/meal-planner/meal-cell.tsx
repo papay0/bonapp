@@ -1,10 +1,11 @@
 'use client';
 
-import { Recipe, MealPlan } from '@/lib/supabase/types';
-import { Plus, Trash2, Eye } from 'lucide-react';
+import { Recipe, MealPlan, Event } from '@/lib/supabase/types';
+import { Plus, Trash2, Eye, Calendar } from 'lucide-react';
 
 interface MealCellProps {
   recipes: Recipe[];
+  events: Event[];
   mealPlans: MealPlan[];
   dayName: string;
   mealType: 'lunch' | 'dinner' | 'breakfast';
@@ -15,6 +16,7 @@ interface MealCellProps {
 
 export function MealCell({
   recipes,
+  events,
   mealPlans,
   dayName,
   mealType,
@@ -22,7 +24,9 @@ export function MealCell({
   onRemove,
   onViewRecipe,
 }: MealCellProps) {
-  if (recipes.length === 0) {
+  const hasItems = recipes.length > 0 || events.length > 0;
+
+  if (!hasItems) {
     return (
       <button
         onClick={onAdd}
@@ -40,7 +44,8 @@ export function MealCell({
 
   return (
     <div className="w-full min-h-[100px] space-y-1.5">
-      {recipes.map((recipe, index) => {
+      {/* Render recipes */}
+      {recipes.map((recipe) => {
         const mealPlan = mealPlans.find(plan => plan.recipe_id === recipe.id);
 
         return (
@@ -60,6 +65,37 @@ export function MealCell({
                 }}
                 className="absolute top-1.5 right-1.5 p-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full transition-all"
                 aria-label="Remove meal"
+              >
+                <Trash2 className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+        );
+      })}
+
+      {/* Render events */}
+      {events.map((event) => {
+        const mealPlan = mealPlans.find(plan => plan.event_id === event.id);
+
+        return (
+          <div
+            key={event.id}
+            className="relative bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg p-2.5 hover:shadow-lg transition-all group"
+          >
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-3 w-3 text-white/90 flex-shrink-0" />
+              <h4 className="font-semibold text-white line-clamp-1 text-xs leading-tight pr-6 drop-shadow">
+                {event.name}
+              </h4>
+            </div>
+            {mealPlan && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemove(mealPlan.id);
+                }}
+                className="absolute top-1.5 right-1.5 p-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full transition-all"
+                aria-label="Remove event"
               >
                 <Trash2 className="h-3 w-3" />
               </button>

@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { WeekView } from '@/components/meal-planner/week-view';
-import { MealType, Recipe, MealPlan } from '@/lib/supabase/types';
+import { MealType, Recipe, MealPlan, Event } from '@/lib/supabase/types';
 import { getWeekStart, formatISODate } from '@/lib/utils/date';
 import { addWeeks } from 'date-fns';
-import { ChefHat, BookOpen, Calendar, TrendingUp, Utensils, CheckCircle2, X, Search, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChefHat, BookOpen, Calendar, TrendingUp, Utensils, CheckCircle2, X, Search, Users, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { Brand } from '@/lib/brand';
 import { UserButton } from '@clerk/nextjs';
@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SegmentedControl } from '@/components/ui/segmented-control';
 import {
   Table,
   TableBody,
@@ -40,6 +41,9 @@ export default function HomePage() {
     mealType: MealType;
   } | null>(null);
   const [recipeSearchQuery, setRecipeSearchQuery] = useState('');
+  const [selectionMode, setSelectionMode] = useState<'recipe' | 'event'>('recipe');
+  const [eventSearchQuery, setEventSearchQuery] = useState('');
+  const [newEventName, setNewEventName] = useState('');
 
   const queryClient = useQueryClient();
   const weekStartISO = formatISODate(currentWeek);
@@ -54,6 +58,16 @@ export default function HomePage() {
     },
   });
 
+  // Fetch events
+  const { data: events = [], isLoading: isLoadingEvents } = useQuery<Event[]>({
+    queryKey: ['events'],
+    queryFn: async () => {
+      const res = await fetch('/api/events');
+      if (!res.ok) throw new Error('Failed to fetch events');
+      return res.json();
+    },
+  });
+
   // Fetch meal plans for current week
   const { data: mealPlans = [], isLoading: isLoadingMealPlans } = useQuery<MealPlan[]>({
     queryKey: ['meal-plans', weekStartISO],
@@ -64,7 +78,7 @@ export default function HomePage() {
     },
   });
 
-  const isLoading = isLoadingRecipes || isLoadingMealPlans;
+  const isLoading = isLoadingRecipes || isLoadingEvents || isLoadingMealPlans;
 
   // Add meal plan mutation
   const addMealPlan = useMutation({
@@ -72,7 +86,8 @@ export default function HomePage() {
       week_start_date: string;
       day_index: number;
       meal_type: MealType;
-      recipe_id: string;
+      recipe_id?: string;
+      event_id?: string;
     }) => {
       const res = await fetch('/api/meal-plans', {
         method: 'POST',
@@ -85,6 +100,10 @@ export default function HomePage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meal-plans', weekStartISO] });
       setSelectedRecipeModal(null);
+      setSelectionMode('recipe');
+      setRecipeSearchQuery('');
+      setEventSearchQuery('');
+      setNewEventName('');
     },
   });
 
@@ -99,6 +118,22 @@ export default function HomePage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meal-plans', weekStartISO] });
+    },
+  });
+
+  // Create event mutation
+  const createEvent = useMutation({
+    mutationFn: async (name: string) => {
+      const res = await fetch('/api/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+      if (!res.ok) throw new Error('Failed to create event');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['events'] });
     },
   });
 
@@ -125,6 +160,34 @@ export default function HomePage() {
     }
   };
 
+  const handleSelectEvent = (eventId: string) => {
+    if (selectedRecipeModal) {
+      addMealPlan.mutate({
+        week_start_date: weekStartISO,
+        day_index: selectedRecipeModal.dayIndex,
+        meal_type: selectedRecipeModal.mealType,
+        event_id: eventId,
+      });
+    }
+  };
+
+  const handleCreateAndSelectEvent = async () => {
+    if (!newEventName.trim() || !selectedRecipeModal) return;
+
+    try {
+      const event = await createEvent.mutateAsync(newEventName.trim());
+      // After creating the event, add it to the meal plan
+      addMealPlan.mutate({
+        week_start_date: weekStartISO,
+        day_index: selectedRecipeModal.dayIndex,
+        meal_type: selectedRecipeModal.mealType,
+        event_id: event.id,
+      });
+    } catch (error) {
+      console.error('Failed to create and select event:', error);
+    }
+  };
+
   const handleRemoveMeal = (mealPlanId: string) => {
     removeMealPlan.mutate(mealPlanId);
   };
@@ -143,6 +206,12 @@ export default function HomePage() {
     const matchesTags = recipe.tags?.some(tag => tag.toLowerCase().includes(searchLower));
 
     return matchesTitle || matchesDescription || matchesTags;
+  });
+
+  // Filter events based on search query
+  const filteredEvents = events.filter((event) => {
+    if (!eventSearchQuery.trim()) return true;
+    return event.name.toLowerCase().includes(eventSearchQuery.toLowerCase());
   });
 
   // Calculate stats
@@ -332,6 +401,7 @@ export default function HomePage() {
           weekStartDate={currentWeek}
           mealPlans={mealPlans}
           recipes={recipes}
+          events={events}
           onPreviousWeek={handlePreviousWeek}
           onNextWeek={handleNextWeek}
           onAddMeal={handleAddMeal}
@@ -339,20 +409,40 @@ export default function HomePage() {
           onViewRecipe={handleViewRecipe}
         />
 
-      {/* Recipe Selection Modal */}
+      {/* Recipe/Event Selection Modal */}
       <Dialog open={!!selectedRecipeModal} onOpenChange={(open) => {
         if (!open) {
           setSelectedRecipeModal(null);
+          setSelectionMode('recipe');
           setRecipeSearchQuery('');
+          setEventSearchQuery('');
+          setNewEventName('');
         }
       }}>
-        <DialogContent className="max-w-3xl max-h-[85vh] p-0">
-          <DialogHeader className="px-6 pt-6 pb-4 border-b space-y-3">
-            <DialogTitle className="text-2xl font-bold">Select a Recipe</DialogTitle>
-            <DialogDescription>
-              Choose a recipe to add to your meal plan
-            </DialogDescription>
-            {recipes.length > 0 && (
+        <DialogContent className="max-w-3xl max-h-[85vh] p-0 flex flex-col">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b space-y-3 flex-shrink-0">
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-1 flex-1 min-w-0">
+                <DialogTitle className="text-xl md:text-2xl font-bold">
+                  {selectionMode === 'recipe' ? 'Select a Recipe' : 'Select an Event'}
+                </DialogTitle>
+                <DialogDescription className="text-sm">
+                  {selectionMode === 'recipe'
+                    ? 'Choose a recipe to add to your meal plan'
+                    : 'Choose or create an event to add to your meal plan'}
+                </DialogDescription>
+              </div>
+              <SegmentedControl
+                options={[
+                  { value: 'recipe', label: 'Recipe', icon: <ChefHat className="h-4 w-4" /> },
+                  { value: 'event', label: 'Event', icon: <Calendar className="h-4 w-4" /> },
+                ]}
+                value={selectionMode}
+                onValueChange={(value) => setSelectionMode(value as 'recipe' | 'event')}
+                className="flex-shrink-0"
+              />
+            </div>
+            {selectionMode === 'recipe' && recipes.length > 0 && (
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
@@ -363,67 +453,157 @@ export default function HomePage() {
                 />
               </div>
             )}
+            {selectionMode === 'event' && events.length > 0 && (
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search events..."
+                  value={eventSearchQuery}
+                  onChange={(e) => setEventSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            )}
           </DialogHeader>
-          <ScrollArea className="max-h-[60vh] px-6">
-            {recipes.length === 0 ? (
-              <div className="text-center py-12">
-                <ChefHat className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-600 mb-6 text-lg">You don't have any recipes yet.</p>
-                <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
-                  <Link href="/home/recipes/new">
-                    Create Your First Recipe
-                  </Link>
-                </Button>
-              </div>
-            ) : filteredRecipes.length === 0 ? (
-              <div className="text-center py-12">
-                <Search className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-600 mb-2 text-lg font-semibold">No recipes found</p>
-                <p className="text-gray-500 text-sm">Try adjusting your search terms</p>
-              </div>
-            ) : (
-              <div className="grid gap-3 py-4">
-                {filteredRecipes.map((recipe) => (
-                  <button
-                    key={recipe.id}
-                    onClick={() => handleSelectRecipe(recipe.id)}
-                    className="text-left p-4 border-2 border-gray-200 rounded-xl hover:border-emerald-400 hover:bg-emerald-50/50 transition-all group"
-                  >
-                    <h3 className="font-semibold text-gray-900 text-lg group-hover:text-emerald-700 transition-colors">
-                      {recipe.title}
-                    </h3>
-                    <div className="flex items-center gap-1.5 text-sm text-amber-700 mt-2">
-                      <Users className="h-4 w-4" />
-                      <span>Serves {recipe.servings}</span>
-                    </div>
-                    {recipe.description && (
-                      <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                        {recipe.description.substring(0, 120)}...
-                      </p>
-                    )}
-                    {recipe.tags && recipe.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        {recipe.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="text-xs px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded-full font-medium"
-                          >
-                            {tag}
-                          </span>
-                        ))}
+          <ScrollArea className="flex-1 overflow-y-auto px-6">
+            {selectionMode === 'recipe' ? (
+              // Recipe list
+              recipes.length === 0 ? (
+                <div className="text-center py-12">
+                  <ChefHat className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-600 mb-6 text-lg">You don't have any recipes yet.</p>
+                  <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
+                    <Link href="/home/recipes/new">
+                      Create Your First Recipe
+                    </Link>
+                  </Button>
+                </div>
+              ) : filteredRecipes.length === 0 ? (
+                <div className="text-center py-12">
+                  <Search className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-600 mb-2 text-lg font-semibold">No recipes found</p>
+                  <p className="text-gray-500 text-sm">Try adjusting your search terms</p>
+                </div>
+              ) : (
+                <div className="grid gap-2.5 py-3">
+                  {filteredRecipes.map((recipe) => (
+                    <button
+                      key={recipe.id}
+                      onClick={() => handleSelectRecipe(recipe.id)}
+                      className="text-left p-3 border-2 border-gray-200 rounded-lg hover:border-emerald-400 hover:bg-emerald-50/50 transition-all group"
+                    >
+                      <h3 className="font-semibold text-gray-900 text-base group-hover:text-emerald-700 transition-colors">
+                        {recipe.title}
+                      </h3>
+                      <div className="flex items-center gap-1.5 text-xs text-amber-700 mt-1.5">
+                        <Users className="h-3.5 w-3.5" />
+                        <span>Serves {recipe.servings}</span>
                       </div>
-                    )}
-                  </button>
-                ))}
+                      {recipe.description && (
+                        <p className="text-xs text-gray-600 mt-1.5 line-clamp-2">
+                          {recipe.description.substring(0, 100)}...
+                        </p>
+                      )}
+                      {recipe.tags && recipe.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {recipe.tags.slice(0, 3).map((tag) => (
+                            <span
+                              key={tag}
+                              className="text-xs px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-medium"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                          {recipe.tags.length > 3 && (
+                            <span className="text-xs px-2 py-0.5 text-gray-500">
+                              +{recipe.tags.length - 3} more
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )
+            ) : (
+              // Event list
+              <div className="py-3 space-y-3">
+                {/* Quick-add new event */}
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 bg-gray-50/50">
+                  <label htmlFor="new-event" className="text-xs font-semibold text-gray-700 mb-1.5 block">
+                    Create a new event
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="new-event"
+                      placeholder="e.g., Running club dinner, Lizzie's party..."
+                      value={newEventName}
+                      onChange={(e) => setNewEventName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleCreateAndSelectEvent();
+                        }
+                      }}
+                      className="flex-1 text-sm"
+                    />
+                    <Button
+                      onClick={handleCreateAndSelectEvent}
+                      disabled={!newEventName.trim() || createEvent.isPending}
+                      className="bg-blue-600 hover:bg-blue-700 flex-shrink-0"
+                      size="sm"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Existing events */}
+                {events.length === 0 ? (
+                  <div className="text-center py-6">
+                    <Calendar className="h-10 w-10 text-gray-300 mx-auto mb-2" />
+                    <p className="text-gray-600 text-xs">No events yet. Create your first event above!</p>
+                  </div>
+                ) : filteredEvents.length === 0 ? (
+                  <div className="text-center py-6">
+                    <Search className="h-10 w-10 text-gray-300 mx-auto mb-2" />
+                    <p className="text-gray-600 text-xs font-semibold">No events found</p>
+                    <p className="text-gray-500 text-xs mt-0.5">Try adjusting your search</p>
+                  </div>
+                ) : (
+                  <div>
+                    <h4 className="text-xs font-semibold text-gray-700 mb-2">Select an existing event</h4>
+                    <div className="grid gap-2">
+                      {filteredEvents.map((event) => (
+                        <button
+                          key={event.id}
+                          onClick={() => handleSelectEvent(event.id)}
+                          className="text-left p-2.5 border-2 border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50/50 transition-all group"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                            <h3 className="font-semibold text-sm text-gray-900 group-hover:text-blue-700 transition-colors truncate">
+                              {event.name}
+                            </h3>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </ScrollArea>
-          <div className="px-6 py-4 border-t bg-gray-50">
+          <div className="px-6 py-4 border-t bg-gray-50 flex-shrink-0">
             <Button
               variant="outline"
               onClick={() => {
                 setSelectedRecipeModal(null);
+                setSelectionMode('recipe');
                 setRecipeSearchQuery('');
+                setEventSearchQuery('');
+                setNewEventName('');
               }}
               className="w-full"
             >

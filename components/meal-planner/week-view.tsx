@@ -1,6 +1,6 @@
 'use client';
 
-import { Recipe, MealPlan, MealType } from '@/lib/supabase/types';
+import { Recipe, MealPlan, MealType, Event } from '@/lib/supabase/types';
 import { MealCell } from './meal-cell';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, startOfWeek, addDays } from 'date-fns';
@@ -19,6 +19,7 @@ interface WeekViewProps {
   weekStartDate: Date;
   mealPlans: MealPlan[];
   recipes: Recipe[];
+  events: Event[];
   onPreviousWeek: () => void;
   onNextWeek: () => void;
   onAddMeal: (dayIndex: number, mealType: MealType) => void;
@@ -33,6 +34,7 @@ export function WeekView({
   weekStartDate,
   mealPlans,
   recipes,
+  events,
   onPreviousWeek,
   onNextWeek,
   onAddMeal,
@@ -48,10 +50,18 @@ export function WeekView({
     );
   };
 
-  const getRecipes = (recipeIds: string[]) => {
+  const getRecipes = (recipeIds: (string | null)[]) => {
     return recipeIds
+      .filter((id): id is string => id !== null)
       .map((id) => recipes.find((recipe) => recipe.id === id))
       .filter((recipe): recipe is Recipe => recipe !== undefined);
+  };
+
+  const getEvents = (eventIds: (string | null)[]) => {
+    return eventIds
+      .filter((id): id is string => id !== null)
+      .map((id) => events.find((event) => event.id === id))
+      .filter((event): event is Event => event !== undefined);
   };
 
   return (
@@ -115,6 +125,7 @@ export function WeekView({
                   {DAYS.map((day, dayIndex) => {
                     const dayMealPlans = getMealPlans(dayIndex, mealType);
                     const dayRecipes = getRecipes(dayMealPlans.map(plan => plan.recipe_id));
+                    const dayEvents = getEvents(dayMealPlans.map(plan => plan.event_id));
 
                     return (
                       <TableCell
@@ -123,6 +134,7 @@ export function WeekView({
                       >
                         <MealCell
                           recipes={dayRecipes}
+                          events={dayEvents}
                           mealPlans={dayMealPlans}
                           dayName={day}
                           mealType={mealType}

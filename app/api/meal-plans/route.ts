@@ -47,13 +47,12 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { week_start_date, day_index, meal_type, recipe_id } = body;
+    const { week_start_date, day_index, meal_type, recipe_id, event_id } = body;
 
     if (
       week_start_date === undefined ||
       day_index === undefined ||
-      !meal_type ||
-      !recipe_id
+      !meal_type
     ) {
       return NextResponse.json(
         { error: 'Missing required fields' },
@@ -61,7 +60,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Insert: allow multiple recipes per meal slot
+    // Must have either recipe_id OR event_id
+    if (!recipe_id && !event_id) {
+      return NextResponse.json(
+        { error: 'Either recipe_id or event_id is required' },
+        { status: 400 }
+      );
+    }
+
+    // Cannot have both
+    if (recipe_id && event_id) {
+      return NextResponse.json(
+        { error: 'Cannot specify both recipe_id and event_id' },
+        { status: 400 }
+      );
+    }
+
+    // Insert: allow multiple recipes/events per meal slot
     const { data: mealPlan, error } = await (supabaseServer as any)
       .from('meal_plans')
       .insert({
@@ -69,7 +84,8 @@ export async function POST(request: NextRequest) {
         week_start_date,
         day_index,
         meal_type,
-        recipe_id,
+        recipe_id: recipe_id || null,
+        event_id: event_id || null,
       })
       .select()
       .single();

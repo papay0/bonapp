@@ -133,8 +133,8 @@ export default function CalendarPage() {
                         {DAYS.map((day, dayIndex) => {
                           const lunchPlan = getMealPlanForDay(weekPlans, dayIndex, 'lunch');
                           const dinnerPlan = getMealPlanForDay(weekPlans, dayIndex, 'dinner');
-                          const lunchRecipe = lunchPlan ? getRecipe(lunchPlan.recipe_id) : null;
-                          const dinnerRecipe = dinnerPlan ? getRecipe(dinnerPlan.recipe_id) : null;
+                          const lunchRecipe = lunchPlan && lunchPlan.recipe_id ? getRecipe(lunchPlan.recipe_id) : null;
+                          const dinnerRecipe = dinnerPlan && dinnerPlan.recipe_id ? getRecipe(dinnerPlan.recipe_id) : null;
 
                           return (
                             <div key={day} className="min-h-[120px]">

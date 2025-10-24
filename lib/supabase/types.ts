@@ -63,6 +63,26 @@ export interface Database {
           created_at?: string;
         };
       };
+      events: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          created_at?: string;
+        };
+      };
       meal_plans: {
         Row: {
           id: string;
@@ -70,7 +90,8 @@ export interface Database {
           week_start_date: string;
           day_index: number;
           meal_type: 'lunch' | 'dinner' | 'breakfast';
-          recipe_id: string;
+          recipe_id: string | null; // Can be null if it's an event
+          event_id: string | null; // References an event
           created_at: string;
         };
         Insert: {
@@ -79,7 +100,8 @@ export interface Database {
           week_start_date: string;
           day_index: number;
           meal_type: 'lunch' | 'dinner' | 'breakfast';
-          recipe_id: string;
+          recipe_id?: string | null;
+          event_id?: string | null;
           created_at?: string;
         };
         Update: {
@@ -88,7 +110,8 @@ export interface Database {
           week_start_date?: string;
           day_index?: number;
           meal_type?: 'lunch' | 'dinner' | 'breakfast';
-          recipe_id?: string;
+          recipe_id?: string | null;
+          event_id?: string | null;
           created_at?: string;
         };
       };
@@ -102,14 +125,17 @@ export interface Database {
 // Type helpers for easier usage
 export type User = Database['public']['Tables']['users']['Row'];
 export type Recipe = Database['public']['Tables']['recipes']['Row'];
+export type Event = Database['public']['Tables']['events']['Row'];
 export type MealPlan = Database['public']['Tables']['meal_plans']['Row'];
 
 export type InsertUser = Database['public']['Tables']['users']['Insert'];
 export type InsertRecipe = Database['public']['Tables']['recipes']['Insert'];
+export type InsertEvent = Database['public']['Tables']['events']['Insert'];
 export type InsertMealPlan = Database['public']['Tables']['meal_plans']['Insert'];
 
 export type UpdateUser = Database['public']['Tables']['users']['Update'];
 export type UpdateRecipe = Database['public']['Tables']['recipes']['Update'];
+export type UpdateEvent = Database['public']['Tables']['events']['Update'];
 export type UpdateMealPlan = Database['public']['Tables']['meal_plans']['Update'];
 
 // Additional helper types
