@@ -71,9 +71,9 @@ export function WeekView({
   };
 
   return (
-    <div className="w-full space-y-3 md:space-y-4">
+    <div className="w-full space-y-2 md:space-y-3">
       {/* Week Navigator */}
-      <Card className="p-3 md:p-4 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 border-0 shadow-xl overflow-hidden relative">
+      <Card className="p-2 md:p-3 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 border-0 shadow-xl overflow-hidden relative">
         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
         <div className="flex items-center justify-between gap-2 relative z-10">
           <Button
@@ -101,17 +101,17 @@ export function WeekView({
       {/* Calendar Table */}
       <Card className="overflow-hidden shadow-md md:shadow-lg border border-gray-200 md:border-2 p-0">
         <div className="overflow-x-auto">
-          <Table className="min-w-[700px] md:min-w-[800px]">
+          <Table className="w-full">
             <TableHeader>
               <TableRow className="bg-gradient-to-r from-emerald-100 to-amber-100 hover:from-emerald-100 hover:to-amber-100 border-b-2 border-gray-300">
-                <TableHead className="w-[70px] md:w-[90px] h-10 md:h-12 font-bold text-gray-900 border-r-2 border-gray-300 text-center align-middle text-xs md:text-sm">
+                <TableHead className="w-[70px] h-10 md:h-12 font-bold text-gray-900 border-r-2 border-gray-300 text-center align-middle text-xs">
                   Meal
                 </TableHead>
                 {DAYS.map((day, index) => (
-                  <TableHead key={day} className="h-10 md:h-12 text-center font-bold text-gray-900 border-r-2 last:border-r-0 border-gray-300 align-middle p-1 md:p-2">
+                  <TableHead key={day} className="h-10 md:h-12 text-center font-bold text-gray-900 border-r-2 last:border-r-0 border-gray-300 align-middle p-1">
                     <div className="flex flex-col items-center justify-center">
-                      <span className="text-xs md:text-sm font-bold">{day}</span>
-                      <span className="text-[10px] md:text-xs font-normal text-gray-600">
+                      <span className="text-xs font-bold">{day.slice(0, 3)}</span>
+                      <span className="text-[10px] font-normal text-gray-600">
                         {format(addDays(weekStart, index), 'MMM d')}
                       </span>
                     </div>
@@ -125,7 +125,7 @@ export function WeekView({
                   key={mealType}
                   className="hover:bg-gray-50/50 border-b-2 last:border-b-0 border-gray-200"
                 >
-                  <TableCell className="font-bold text-gray-700 capitalize bg-gradient-to-r from-gray-50 to-gray-100 border-r-2 border-gray-300 text-center align-middle p-0 text-xs md:text-sm">
+                  <TableCell className="font-bold text-gray-700 capitalize bg-gradient-to-r from-gray-50 to-gray-100 border-r-2 border-gray-300 text-center align-middle p-0 text-xs">
                     {mealType}
                   </TableCell>
                   {DAYS.map((day, dayIndex) => {
@@ -136,7 +136,7 @@ export function WeekView({
                     return (
                       <TableCell
                         key={`${day}-${mealType}`}
-                        className="p-2 md:p-3 border-r-2 last:border-r-0 border-gray-300 align-middle"
+                        className="p-1.5 md:p-2 border-r-2 last:border-r-0 border-gray-300 align-middle"
                       >
                         <MealCell
                           recipes={dayRecipes}
