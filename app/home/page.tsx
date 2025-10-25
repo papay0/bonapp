@@ -7,11 +7,9 @@ import { WeekView } from '@/components/meal-planner/week-view';
 import { MealType, Recipe, MealPlan, Event } from '@/lib/supabase/types';
 import { getWeekStart, formatISODate } from '@/lib/utils/date';
 import { addWeeks } from 'date-fns';
-import { ChefHat, BookOpen, Calendar, TrendingUp, Utensils, CheckCircle2, X, Search, Users, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ChefHat, Calendar, X, Search, Users, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { Brand } from '@/lib/brand';
-import { UserButton } from '@clerk/nextjs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -230,15 +228,6 @@ export default function HomePage() {
     return event.name.toLowerCase().includes(eventSearchQuery.toLowerCase());
   });
 
-  // Calculate stats
-  const totalRecipes = recipes.length;
-  const mealsPlannedThisWeek = mealPlans.length;
-  const mealsPerDay = settings?.breakfast_enabled ? 3 : 2; // breakfast + lunch + dinner OR lunch + dinner
-  const totalMealSlots = 7 * mealsPerDay; // 7 days * meals per day
-  const completionPercentage = totalMealSlots > 0
-    ? Math.round((mealsPlannedThisWeek / totalMealSlots) * 100)
-    : 0;
-
   if (isLoading) {
     return (
       <>
@@ -251,39 +240,6 @@ export default function HomePage() {
         </Link>
 
         <div className="space-y-4 md:space-y-6">
-          {/* Stats Section - Loading */}
-          <div className="grid grid-cols-3 gap-2 md:gap-3">
-            <Card className="border-0 bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg overflow-hidden">
-              <CardContent className="p-3 md:p-4">
-                <div className="flex items-start justify-between mb-1">
-                  <div className="text-[10px] md:text-xs font-semibold text-white/80 uppercase tracking-wide">Recipes</div>
-                  <BookOpen className="h-3 w-3 md:h-4 md:w-4 text-white/60" />
-                </div>
-                <Skeleton className="h-8 md:h-10 w-12 bg-white/20" />
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg overflow-hidden">
-              <CardContent className="p-3 md:p-4">
-                <div className="flex items-start justify-between mb-1">
-                  <div className="text-[10px] md:text-xs font-semibold text-white/80 uppercase tracking-wide">Week</div>
-                  <Utensils className="h-3 w-3 md:h-4 md:w-4 text-white/60" />
-                </div>
-                <Skeleton className="h-8 md:h-10 w-16 bg-white/20" />
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 bg-gradient-to-br from-violet-500 to-purple-500 shadow-lg overflow-hidden">
-              <CardContent className="p-3 md:p-4">
-                <div className="flex items-start justify-between mb-1">
-                  <div className="text-[10px] md:text-xs font-semibold text-white/80 uppercase tracking-wide">Done</div>
-                  <CheckCircle2 className="h-3 w-3 md:h-4 md:w-4 text-white/60" />
-                </div>
-                <Skeleton className="h-8 md:h-10 w-20 bg-white/20" />
-              </CardContent>
-            </Card>
-          </div>
-
           {/* Week Navigator - Loading */}
           <Card className="p-3 md:p-4 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 border-0 shadow-xl overflow-hidden relative">
             <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
@@ -368,51 +324,6 @@ export default function HomePage() {
       </Link>
 
       <div className="space-y-4 md:space-y-6">
-        {/* Stats Section */}
-        <div className="grid grid-cols-3 gap-2 md:gap-3">
-          <Card className="border-0 bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg hover:shadow-xl transition-all hover:scale-105 overflow-hidden">
-            <CardContent className="p-3 md:p-4">
-              <div className="flex items-start justify-between mb-1">
-                <div className="text-[10px] md:text-xs font-semibold text-white/80 uppercase tracking-wide">Recipes</div>
-                <BookOpen className="h-3 w-3 md:h-4 md:w-4 text-white/60" />
-              </div>
-              <div className="text-2xl md:text-3xl font-black text-white">{totalRecipes}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg hover:shadow-xl transition-all hover:scale-105 overflow-hidden">
-            <CardContent className="p-3 md:p-4">
-              <div className="flex items-start justify-between mb-1">
-                <div className="text-[10px] md:text-xs font-semibold text-white/80 uppercase tracking-wide">Week</div>
-                <Utensils className="h-3 w-3 md:h-4 md:w-4 text-white/60" />
-              </div>
-              <div className="text-2xl md:text-3xl font-black text-white">
-                {mealsPlannedThisWeek}/{totalMealSlots}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 bg-gradient-to-br from-violet-500 to-purple-500 shadow-lg hover:shadow-xl transition-all hover:scale-105 overflow-hidden">
-            <CardContent className="p-3 md:p-4">
-              <div className="flex items-start justify-between mb-1">
-                <div className="text-[10px] md:text-xs font-semibold text-white/80 uppercase tracking-wide">Done</div>
-                <CheckCircle2 className="h-3 w-3 md:h-4 md:w-4 text-white/60" />
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="text-2xl md:text-3xl font-black text-white">{completionPercentage}%</div>
-                <div className="flex-1">
-                  <div className="w-full bg-white/30 rounded-full h-1.5">
-                    <div
-                      className="bg-white h-1.5 rounded-full transition-all duration-700 ease-out"
-                      style={{ width: `${completionPercentage}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Week View */}
         <WeekView
           weekStartDate={currentWeek}
