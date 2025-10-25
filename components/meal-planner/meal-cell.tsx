@@ -87,11 +87,16 @@ export function MealCell({
       {/* Render events */}
       {events.map((event) => {
         const mealPlan = mealPlans.find(plan => plan.event_id === event.id);
+        const isCooking = event.name === 'Cooking 👨‍🍳';
 
         return (
           <div
             key={event.id}
-            className="relative bg-gradient-to-br from-blue-500 to-cyan-500 rounded-md p-2 hover:shadow-lg transition-all group w-full"
+            className={`relative rounded-md p-2 hover:shadow-lg transition-all group w-full ${
+              isCooking
+                ? 'bg-gradient-to-br from-red-500 to-rose-500'
+                : 'bg-gradient-to-br from-blue-500 to-cyan-500'
+            }`}
           >
             <div className="flex items-start gap-1 w-full">
               <Calendar className="h-3 w-3 text-white/90 flex-shrink-0 mt-0.5" />

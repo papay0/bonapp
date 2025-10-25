@@ -39,7 +39,7 @@ export default function HomePage() {
     mealType: MealType;
   } | null>(null);
   const [recipeSearchQuery, setRecipeSearchQuery] = useState('');
-  const [selectionMode, setSelectionMode] = useState<'recipe' | 'event'>('recipe');
+  const [selectionMode, setSelectionMode] = useState<'recipe' | 'event' | 'cooking'>('recipe');
   const [eventSearchQuery, setEventSearchQuery] = useState('');
   const [newEventName, setNewEventName] = useState('');
 
@@ -202,6 +202,34 @@ export default function HomePage() {
     }
   };
 
+  const handleCreateCooking = async () => {
+    if (!selectedRecipeModal) return;
+
+    try {
+      // Find or create a "Cooking 👨‍🍳" event
+      let cookingEvent = events.find(e => e.name === 'Cooking 👨‍🍳');
+
+      if (!cookingEvent) {
+        cookingEvent = await createEvent.mutateAsync('Cooking 👨‍🍳');
+      }
+
+      if (!cookingEvent) {
+        console.error('Failed to create cooking event');
+        return;
+      }
+
+      // Add it to the meal plan
+      addMealPlan.mutate({
+        week_start_date: weekStartISO,
+        day_index: selectedRecipeModal.dayIndex,
+        meal_type: selectedRecipeModal.mealType,
+        event_id: cookingEvent.id,
+      });
+    } catch (error) {
+      console.error('Failed to create and select cooking event:', error);
+    }
+  };
+
   const handleRemoveMeal = (mealPlanId: string) => {
     removeMealPlan.mutate(mealPlanId);
   };
@@ -353,21 +381,34 @@ export default function HomePage() {
             <div className="flex items-center justify-between gap-4">
               <div className="space-y-1 flex-1 min-w-0">
                 <DialogTitle className="text-xl md:text-2xl font-bold">
-                  {selectionMode === 'recipe' ? 'Select a Recipe' : 'Select an Event'}
+                  {selectionMode === 'recipe'
+                    ? 'Select a Recipe'
+                    : selectionMode === 'event'
+                    ? 'Select an Event'
+                    : 'Add Cooking Time'}
                 </DialogTitle>
                 <DialogDescription className="text-sm">
                   {selectionMode === 'recipe'
                     ? 'Choose a recipe to add to your meal plan'
-                    : 'Choose or create an event to add to your meal plan'}
+                    : selectionMode === 'event'
+                    ? 'Choose or create an event to add to your meal plan'
+                    : 'Adding cooking time to your schedule'}
                 </DialogDescription>
               </div>
               <SegmentedControl
                 options={[
                   { value: 'recipe', label: 'Recipe', icon: <ChefHat className="h-4 w-4" /> },
                   { value: 'event', label: 'Event', icon: <Calendar className="h-4 w-4" /> },
+                  { value: 'cooking', label: 'Cooking 👨‍🍳', icon: null },
                 ]}
                 value={selectionMode}
-                onValueChange={(value) => setSelectionMode(value as 'recipe' | 'event')}
+                onValueChange={(value) => {
+                  const mode = value as 'recipe' | 'event' | 'cooking';
+                  setSelectionMode(mode);
+                  if (mode === 'cooking') {
+                    handleCreateCooking();
+                  }
+                }}
                 className="flex-shrink-0"
               />
             </div>
