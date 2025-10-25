@@ -14,7 +14,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
   return (
     <Link
       href={`/home/recipes/${recipe.id}`}
-      className="block bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg hover:border-emerald-300 transition-all group"
+      className="block bg-white border border-gray-200 rounded-lg p-4 md:p-6 hover:shadow-lg hover:border-emerald-300 transition-all group"
     >
       <div className="flex flex-col gap-3">
         {/* Title */}

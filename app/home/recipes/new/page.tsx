@@ -110,11 +110,11 @@ export default function NewRecipePage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Create New Recipe</h1>
+    <div className="max-w-4xl mx-auto px-4">
+      <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-6">Create New Recipe</h1>
 
       {/* AI Recipe Generator Card */}
-      <Card className="mb-8 border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
+      <Card className="mb-6 md:mb-8 border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-emerald-700">
             <Sparkles className="h-5 w-5" />
@@ -181,7 +181,7 @@ export default function NewRecipePage() {
       </Card>
 
       {/* Recipe Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
         {/* Title */}
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">

@@ -134,37 +134,37 @@ export default function RecipeDetailPage({
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto px-4">
         {/* Header Section - Loading */}
-        <div className="mb-8">
+        <div className="mb-6 md:mb-8">
           {/* Title and Delete Button */}
-          <div className="flex items-start justify-between gap-4 mb-6">
-            <Skeleton className="h-10 w-2/3" />
-            <Skeleton className="h-10 w-24" />
+          <div className="flex items-start justify-between gap-3 mb-4 md:mb-6">
+            <Skeleton className="h-8 md:h-10 w-2/3" />
+            <Skeleton className="h-8 md:h-10 w-16 md:w-24" />
           </div>
 
           {/* Metadata */}
-          <div className="space-y-3 mb-6">
-            <Skeleton className="h-8 w-32" />
-            <div className="flex flex-wrap gap-2">
-              <Skeleton className="h-7 w-20 rounded-full" />
-              <Skeleton className="h-7 w-24 rounded-full" />
-              <Skeleton className="h-7 w-16 rounded-full" />
+          <div className="space-y-2 md:space-y-3 mb-4 md:mb-6">
+            <Skeleton className="h-7 md:h-8 w-28 md:w-32" />
+            <div className="flex flex-wrap gap-1.5 md:gap-2">
+              <Skeleton className="h-6 md:h-7 w-16 md:w-20 rounded-full" />
+              <Skeleton className="h-6 md:h-7 w-20 md:w-24 rounded-full" />
+              <Skeleton className="h-6 md:h-7 w-14 md:w-16 rounded-full" />
             </div>
           </div>
 
           {/* Tabs */}
           <div className="border-b border-gray-200">
-            <div className="flex gap-8 justify-center md:justify-start">
-              <Skeleton className="h-12 w-16" />
-              <Skeleton className="h-12 w-16" />
+            <div className="flex gap-6 md:gap-8 justify-center md:justify-start">
+              <Skeleton className="h-10 md:h-12 w-14 md:w-16" />
+              <Skeleton className="h-10 md:h-12 w-14 md:w-16" />
             </div>
           </div>
         </div>
 
         {/* Content Section - Loading */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="space-y-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
+          <div className="space-y-3 md:space-y-4">
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-5/6" />
@@ -205,35 +205,36 @@ export default function RecipeDetailPage({
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto px-4">
       {/* Header Section */}
-      <div className="mb-8">
+      <div className="mb-6 md:mb-8">
         {/* Title and Delete Button */}
-        <div className="flex items-start justify-between gap-4 mb-6">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 flex-1">{recipe.title}</h1>
+        <div className="flex items-start justify-between gap-3 mb-4 md:mb-6">
+          <h1 className="text-xl md:text-3xl lg:text-4xl font-bold text-gray-900 flex-1 break-words">{recipe.title}</h1>
           <Button
             variant="destructive"
             onClick={handleDelete}
             disabled={deleteRecipe.isPending}
             className="shrink-0"
+            size="sm"
           >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete
+            <Trash2 className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Delete</span>
           </Button>
         </div>
 
         {/* Metadata */}
-        <div className="space-y-3 mb-6">
-          <div className="flex flex-wrap items-center gap-3">
-            <Badge variant="outline" className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border-amber-300 bg-amber-50 text-amber-700">
-              <Users className="h-4 w-4" />
+        <div className="space-y-2 md:space-y-3 mb-4 md:mb-6">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className="flex items-center gap-1.5 px-2.5 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium border-amber-300 bg-amber-50 text-amber-700">
+              <Users className="h-3.5 w-3.5 md:h-4 md:w-4" />
               Serves {recipe.servings} {recipe.servings === 1 ? 'person' : 'people'}
             </Badge>
           </div>
           {recipe.tags && recipe.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 md:gap-2">
               {recipe.tags.map((tag) => (
-                <Badge key={tag} className="bg-emerald-100 text-emerald-700 border-emerald-300 px-3 py-1">
+                <Badge key={tag} className="bg-emerald-100 text-emerald-700 border-emerald-300 px-2.5 md:px-3 py-0.5 md:py-1 text-xs">
                   {tag}
                 </Badge>
               ))}
@@ -243,10 +244,10 @@ export default function RecipeDetailPage({
 
         {/* Tabs */}
         <div className="border-b border-gray-200">
-          <div className="flex gap-8 justify-center md:justify-start">
+          <div className="flex gap-6 md:gap-8 justify-center md:justify-start">
             <button
               onClick={() => setActiveTab('view')}
-              className={`pb-4 px-4 font-semibold text-base transition-all border-b-2 ${
+              className={`pb-3 md:pb-4 px-3 md:px-4 font-semibold text-sm md:text-base transition-all border-b-2 ${
                 activeTab === 'view'
                   ? 'text-emerald-600 border-emerald-600'
                   : 'text-gray-500 border-transparent hover:text-emerald-600 hover:border-gray-300'
@@ -256,7 +257,7 @@ export default function RecipeDetailPage({
             </button>
             <button
               onClick={() => setActiveTab('edit')}
-              className={`pb-4 px-4 font-semibold text-base transition-all border-b-2 ${
+              className={`pb-3 md:pb-4 px-3 md:px-4 font-semibold text-sm md:text-base transition-all border-b-2 ${
                 activeTab === 'edit'
                   ? 'text-emerald-600 border-emerald-600'
                   : 'text-gray-500 border-transparent hover:text-emerald-600 hover:border-gray-300'
@@ -269,17 +270,17 @@ export default function RecipeDetailPage({
       </div>
 
       {/* Content Section */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
         {activeTab === 'view' ? (
-          <div className="space-y-6">
-            <div className="prose prose-slate max-w-none prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:text-gray-700 prose-strong:text-gray-900 prose-a:text-emerald-600">
+          <div className="space-y-4 md:space-y-6">
+            <div className="prose prose-slate max-w-none prose-headings:font-bold prose-h1:text-xl md:prose-h1:text-3xl prose-h2:text-lg md:prose-h2:text-2xl prose-h3:text-base md:prose-h3:text-xl prose-p:text-gray-700 prose-strong:text-gray-900 prose-a:text-emerald-600">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  h1: ({node, ...props}) => <h1 className="text-3xl font-bold mt-6 mb-4" {...props} />,
-                  h2: ({node, ...props}) => <h2 className="text-2xl font-bold mt-5 mb-3" {...props} />,
-                  h3: ({node, ...props}) => <h3 className="text-xl font-bold mt-4 mb-2" {...props} />,
-                  h4: ({node, ...props}) => <h4 className="text-lg font-bold mt-3 mb-2" {...props} />,
+                  h1: ({node, ...props}) => <h1 className="text-xl md:text-3xl font-bold mt-4 md:mt-6 mb-3 md:mb-4" {...props} />,
+                  h2: ({node, ...props}) => <h2 className="text-lg md:text-2xl font-bold mt-4 md:mt-5 mb-2 md:mb-3" {...props} />,
+                  h3: ({node, ...props}) => <h3 className="text-base md:text-xl font-bold mt-3 md:mt-4 mb-2" {...props} />,
+                  h4: ({node, ...props}) => <h4 className="text-base md:text-lg font-bold mt-2 md:mt-3 mb-2" {...props} />,
                   p: ({node, ...props}) => <p className="mb-4" {...props} />,
                   ul: ({node, ...props}) => <ul className="list-disc list-inside mb-4 space-y-2" {...props} />,
                   ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-4 space-y-2" {...props} />,
@@ -302,7 +303,7 @@ export default function RecipeDetailPage({
                 <>
                   <Separator />
                   <div>
-                    <h3 className="text-lg font-semibold mb-3 text-gray-900">Source Links</h3>
+                    <h3 className="text-base md:text-lg font-semibold mb-2 md:mb-3 text-gray-900">Source Links</h3>
                     <div className="space-y-2">
                       {linksArray.map((link, index: number) => (
                         <a
@@ -310,10 +311,10 @@ export default function RecipeDetailPage({
                           href={link.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-2 text-emerald-600 hover:text-emerald-700 hover:underline"
+                          className="flex items-center gap-2 text-emerald-600 hover:text-emerald-700 hover:underline text-sm md:text-base break-all"
                         >
-                          <ExternalLink className="h-4 w-4" />
-                          {link.url}
+                          <ExternalLink className="h-3.5 w-3.5 md:h-4 md:w-4 shrink-0" />
+                          <span className="break-all">{link.url}</span>
                         </a>
                       ))}
                     </div>
@@ -323,7 +324,7 @@ export default function RecipeDetailPage({
             })()}
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
             {/* Title */}
             <div className="space-y-2">
               <Label htmlFor="title">Recipe Title *</Label>

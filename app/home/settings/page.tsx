@@ -50,13 +50,13 @@ export default function SettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-2xl mx-auto px-4 space-y-6">
+      <div className="max-w-2xl mx-auto px-4 space-y-4 md:space-y-6">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <SettingsIcon className="h-8 w-8 text-emerald-600" />
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-2 md:gap-3">
+            <SettingsIcon className="h-6 w-6 md:h-8 md:w-8 text-emerald-600" />
             Settings
           </h1>
-          <p className="text-gray-600">Customize your meal planning experience</p>
+          <p className="text-sm md:text-base text-gray-600">Customize your meal planning experience</p>
         </div>
 
         <Card>
@@ -79,13 +79,13 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 space-y-6">
+    <div className="max-w-2xl mx-auto px-4 space-y-4 md:space-y-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-          <SettingsIcon className="h-8 w-8 text-emerald-600" />
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-2 md:gap-3">
+          <SettingsIcon className="h-6 w-6 md:h-8 md:w-8 text-emerald-600" />
           Settings
         </h1>
-        <p className="text-gray-600">Customize your meal planning experience</p>
+        <p className="text-sm md:text-base text-gray-600">Customize your meal planning experience</p>
       </div>
 
       <Card>

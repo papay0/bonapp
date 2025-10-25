@@ -74,11 +74,11 @@ export default function CalendarPage() {
   }, [isLoading]);
 
   return (
-    <div className="container mx-auto px-4">
-      <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <Calendar className="h-8 w-8 text-emerald-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Calendar Timeline</h1>
+    <div className="max-w-7xl mx-auto px-4">
+      <div className="mb-6 md:mb-8">
+          <div className="flex items-center gap-2 md:gap-3 mb-2">
+            <Calendar className="h-6 w-6 md:h-8 md:w-8 text-emerald-600" />
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Calendar Timeline</h1>
           </div>
           <p className="text-gray-600">
             View your meal planning history and upcoming weeks
