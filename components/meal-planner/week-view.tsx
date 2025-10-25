@@ -101,17 +101,17 @@ export function WeekView({
       {/* Calendar Table */}
       <Card className="overflow-hidden shadow-md md:shadow-lg border border-gray-200 md:border-2 p-0">
         <div className="overflow-x-auto">
-          <Table className="w-full">
+          <Table className="w-full table-fixed">
             <TableHeader>
               <TableRow className="bg-gradient-to-r from-emerald-100 to-amber-100 hover:from-emerald-100 hover:to-amber-100 border-b-2 border-gray-300">
-                <TableHead className="w-[70px] h-10 md:h-12 font-bold text-gray-900 border-r-2 border-gray-300 text-center align-middle text-xs">
+                <TableHead className="w-[60px] h-10 md:h-12 font-bold text-gray-900 border-r-2 border-gray-300 text-center align-middle text-[11px]">
                   Meal
                 </TableHead>
                 {DAYS.map((day, index) => (
-                  <TableHead key={day} className="h-10 md:h-12 text-center font-bold text-gray-900 border-r-2 last:border-r-0 border-gray-300 align-middle p-1">
+                  <TableHead key={day} className="h-10 md:h-12 text-center font-bold text-gray-900 border-r-2 last:border-r-0 border-gray-300 align-middle p-0.5">
                     <div className="flex flex-col items-center justify-center">
-                      <span className="text-xs font-bold">{day.slice(0, 3)}</span>
-                      <span className="text-[10px] font-normal text-gray-600">
+                      <span className="text-[11px] font-bold">{day.slice(0, 3)}</span>
+                      <span className="text-[9px] font-normal text-gray-600">
                         {format(addDays(weekStart, index), 'MMM d')}
                       </span>
                     </div>
@@ -125,7 +125,7 @@ export function WeekView({
                   key={mealType}
                   className="hover:bg-gray-50/50 border-b-2 last:border-b-0 border-gray-200"
                 >
-                  <TableCell className="font-bold text-gray-700 capitalize bg-gradient-to-r from-gray-50 to-gray-100 border-r-2 border-gray-300 text-center align-middle p-0 text-xs">
+                  <TableCell className="font-bold text-gray-700 capitalize bg-gradient-to-r from-gray-50 to-gray-100 border-r-2 border-gray-300 text-center align-middle p-0 text-[11px]">
                     {mealType}
                   </TableCell>
                   {DAYS.map((day, dayIndex) => {
@@ -136,7 +136,7 @@ export function WeekView({
                     return (
                       <TableCell
                         key={`${day}-${mealType}`}
-                        className="p-1.5 md:p-2 border-r-2 last:border-r-0 border-gray-300 align-middle"
+                        className="p-1 border-r-2 last:border-r-0 border-gray-300 align-middle"
                       >
                         <MealCell
                           recipes={dayRecipes}

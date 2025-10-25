@@ -74,7 +74,7 @@ export default function CalendarPage() {
   }, [isLoading]);
 
   return (
-    <>
+    <div className="container mx-auto px-4">
       <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <Calendar className="h-8 w-8 text-emerald-600" />
@@ -172,6 +172,6 @@ export default function CalendarPage() {
             })}
           </div>
         )}
-    </>
+    </div>
   );
 }

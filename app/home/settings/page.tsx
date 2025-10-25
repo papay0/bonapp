@@ -50,7 +50,7 @@ export default function SettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-2xl mx-auto px-4 space-y-6">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <SettingsIcon className="h-8 w-8 text-emerald-600" />
@@ -79,7 +79,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto px-4 space-y-6">
       <div className="space-y-2">
         <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
           <SettingsIcon className="h-8 w-8 text-emerald-600" />

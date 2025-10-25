@@ -323,7 +323,7 @@ export default function HomePage() {
         <ChefHat className="h-6 w-6 group-hover:rotate-12 transition-transform" />
       </Link>
 
-      <div className="space-y-4 md:space-y-6">
+      <div className="px-4 space-y-3 md:space-y-4">
         {/* Week View */}
         <WeekView
           weekStartDate={currentWeek}

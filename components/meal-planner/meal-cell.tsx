@@ -30,10 +30,10 @@ export function MealCell({
     return (
       <button
         onClick={onAdd}
-        className="w-full h-[80px] bg-gray-50/50 hover:bg-emerald-50 rounded-lg transition-all group flex flex-col items-center justify-center gap-1 border border-gray-200/40 hover:border-emerald-300"
+        className="w-full h-[80px] bg-gray-50/50 hover:bg-emerald-50 rounded-md transition-all group flex flex-col items-center justify-center gap-0.5 border border-gray-200/40 hover:border-emerald-300"
       >
-        <div className="bg-gray-100 group-hover:bg-emerald-500 rounded-full p-1.5 transition-all">
-          <Plus className="h-4 w-4 text-gray-400 group-hover:text-white transition-colors" />
+        <div className="bg-gray-100 group-hover:bg-emerald-500 rounded-full p-1 transition-all">
+          <Plus className="h-3 w-3 text-gray-400 group-hover:text-white transition-colors" />
         </div>
         <span className="text-xs font-medium text-gray-400 group-hover:text-emerald-700 transition-all">
           Add {mealType}
@@ -51,10 +51,21 @@ export function MealCell({
         return (
           <div
             key={recipe.id}
-            className="relative bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg p-2 hover:shadow-lg transition-all cursor-pointer group"
+            className="relative bg-gradient-to-br from-emerald-500 to-teal-500 rounded-md p-2 hover:shadow-lg transition-all cursor-pointer group w-full"
             onClick={() => onViewRecipe(recipe.id)}
           >
-            <h4 className="font-semibold text-white line-clamp-2 text-xs leading-tight pr-5 drop-shadow">
+            <h4
+              className="font-semibold text-white text-xs pr-6 drop-shadow"
+              style={{
+                display: '-webkit-box',
+                WebkitBoxOrient: 'vertical',
+                WebkitLineClamp: 3,
+                overflow: 'hidden',
+                wordBreak: 'break-word',
+                lineHeight: '1.3',
+                whiteSpace: 'normal'
+              }}
+            >
               {recipe.title}
             </h4>
             {mealPlan && (
@@ -63,7 +74,7 @@ export function MealCell({
                   e.stopPropagation();
                   onRemove(mealPlan.id);
                 }}
-                className="absolute top-1.5 right-1.5 p-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full transition-all flex items-center justify-center"
+                className="absolute top-1/2 -translate-y-1/2 right-1 p-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full transition-all flex items-center justify-center"
                 aria-label="Remove meal"
               >
                 <Trash2 className="h-3 w-3" />
@@ -80,11 +91,22 @@ export function MealCell({
         return (
           <div
             key={event.id}
-            className="relative bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg p-2 hover:shadow-lg transition-all group"
+            className="relative bg-gradient-to-br from-blue-500 to-cyan-500 rounded-md p-2 hover:shadow-lg transition-all group w-full"
           >
-            <div className="flex items-start gap-1.5">
+            <div className="flex items-start gap-1 w-full">
               <Calendar className="h-3 w-3 text-white/90 flex-shrink-0 mt-0.5" />
-              <h4 className="font-semibold text-white line-clamp-2 text-xs leading-tight pr-5 drop-shadow">
+              <h4
+                className="font-semibold text-white text-xs pr-6 drop-shadow flex-1 min-w-0"
+                style={{
+                  display: '-webkit-box',
+                  WebkitBoxOrient: 'vertical',
+                  WebkitLineClamp: 3,
+                  overflow: 'hidden',
+                  wordBreak: 'break-word',
+                  lineHeight: '1.3',
+                  whiteSpace: 'normal'
+                }}
+              >
                 {event.name}
               </h4>
             </div>
@@ -94,7 +116,7 @@ export function MealCell({
                   e.stopPropagation();
                   onRemove(mealPlan.id);
                 }}
-                className="absolute top-1.5 right-1.5 p-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full transition-all flex items-center justify-center"
+                className="absolute top-1/2 -translate-y-1/2 right-1 p-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full transition-all flex items-center justify-center"
                 aria-label="Remove event"
               >
                 <Trash2 className="h-3 w-3" />
@@ -107,10 +129,10 @@ export function MealCell({
       {/* Add button - subtle but visible */}
       <button
         onClick={onAdd}
-        className="w-full bg-gray-50/50 hover:bg-emerald-50 rounded-lg transition-all group flex items-center justify-center gap-1.5 py-2 border border-gray-200/40 hover:border-emerald-300"
+        className="w-full bg-gray-50/50 hover:bg-emerald-50 rounded-md transition-all group flex items-center justify-center gap-1 py-1.5 border border-gray-200/40 hover:border-emerald-300"
       >
-        <div className="bg-gray-100 group-hover:bg-emerald-500 rounded-full p-1 transition-all">
-          <Plus className="h-3 w-3 text-gray-400 group-hover:text-white transition-colors" />
+        <div className="bg-gray-100 group-hover:bg-emerald-500 rounded-full p-0.5 transition-all">
+          <Plus className="h-2.5 w-2.5 text-gray-400 group-hover:text-white transition-colors" />
         </div>
         <span className="text-xs font-medium text-gray-400 group-hover:text-emerald-700 transition-all">
           Add more
