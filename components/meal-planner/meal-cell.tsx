@@ -1,7 +1,8 @@
 'use client';
 
 import { Recipe, MealPlan, Event } from '@/lib/supabase/types';
-import { Plus, Trash2, Eye, Calendar } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
+import { ColorPicker } from '@/components/ui/color-picker';
 
 interface MealCellProps {
   recipes: Recipe[];
@@ -12,6 +13,7 @@ interface MealCellProps {
   onAdd: () => void;
   onRemove: (mealPlanId: string) => void;
   onViewRecipe: (recipeId: string) => void;
+  onUpdateColor: (mealPlanId: string, color: string | null) => void;
 }
 
 export function MealCell({
@@ -23,6 +25,7 @@ export function MealCell({
   onAdd,
   onRemove,
   onViewRecipe,
+  onUpdateColor,
 }: MealCellProps) {
   const hasItems = recipes.length > 0 || events.length > 0;
 
@@ -54,20 +57,28 @@ export function MealCell({
             className="relative bg-gradient-to-br from-emerald-500 to-teal-500 rounded-md p-2 hover:shadow-lg transition-all cursor-pointer group w-full"
             onClick={() => onViewRecipe(recipe.id)}
           >
-            <h4
-              className="font-semibold text-white text-xs pr-6 drop-shadow"
-              style={{
-                display: '-webkit-box',
-                WebkitBoxOrient: 'vertical',
-                WebkitLineClamp: 3,
-                overflow: 'hidden',
-                wordBreak: 'break-word',
-                lineHeight: '1.3',
-                whiteSpace: 'normal'
-              }}
-            >
-              {recipe.title}
-            </h4>
+            <div className="flex items-center gap-1.5 w-full">
+              {mealPlan && (
+                <ColorPicker
+                  value={mealPlan.color}
+                  onChange={(color) => onUpdateColor(mealPlan.id, color)}
+                />
+              )}
+              <h4
+                className="font-semibold text-white text-xs pr-6 drop-shadow flex-1 min-w-0"
+                style={{
+                  display: '-webkit-box',
+                  WebkitBoxOrient: 'vertical',
+                  WebkitLineClamp: 3,
+                  overflow: 'hidden',
+                  wordBreak: 'break-word',
+                  lineHeight: '1.3',
+                  whiteSpace: 'normal'
+                }}
+              >
+                {recipe.title}
+              </h4>
+            </div>
             {mealPlan && (
               <button
                 onClick={(e) => {
@@ -87,7 +98,7 @@ export function MealCell({
       {/* Render events */}
       {events.map((event) => {
         const mealPlan = mealPlans.find(plan => plan.event_id === event.id);
-        const isCooking = event.name === 'Cooking 👨‍🍳';
+        const isCooking = event.name === 'Cooking';
 
         return (
           <div
@@ -98,8 +109,13 @@ export function MealCell({
                 : 'bg-gradient-to-br from-blue-500 to-cyan-500'
             }`}
           >
-            <div className="flex items-start gap-1 w-full">
-              <Calendar className="h-3 w-3 text-white/90 flex-shrink-0 mt-0.5" />
+            <div className="flex items-center gap-1.5 w-full">
+              {mealPlan && (
+                <ColorPicker
+                  value={mealPlan.color}
+                  onChange={(color) => onUpdateColor(mealPlan.id, color)}
+                />
+              )}
               <h4
                 className="font-semibold text-white text-xs pr-6 drop-shadow flex-1 min-w-0"
                 style={{

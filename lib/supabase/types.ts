@@ -1,8 +1,3 @@
-/**
- * Database types for Supabase
- * This file defines the TypeScript types for all database tables
- */
-
 export type Json =
   | string
   | number
@@ -11,115 +6,206 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
   public: {
     Tables: {
-      users: {
-        Row: {
-          id: string; // Clerk user ID (TEXT)
-          created_at: string;
-          last_connected_at: string;
-        };
-        Insert: {
-          id: string; // Clerk user ID (TEXT)
-          created_at?: string;
-          last_connected_at?: string;
-        };
-        Update: {
-          id?: string;
-          created_at?: string;
-          last_connected_at?: string;
-        };
-      };
-      recipes: {
-        Row: {
-          id: string;
-          user_id: string;
-          title: string;
-          description: string;
-          links: Json;
-          tags: string[] | null;
-          servings: number;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          title: string;
-          description: string;
-          links?: Json;
-          tags?: string[] | null;
-          servings?: number;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          title?: string;
-          description?: string;
-          links?: Json;
-          tags?: string[] | null;
-          servings?: number;
-          created_at?: string;
-        };
-      };
       events: {
         Row: {
-          id: string;
-          user_id: string;
-          name: string;
-          created_at: string;
-        };
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
         Insert: {
-          id?: string;
-          user_id: string;
-          name: string;
-          created_at?: string;
-        };
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
         Update: {
-          id?: string;
-          user_id?: string;
-          name?: string;
-          created_at?: string;
-        };
-      };
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meal_plans: {
         Row: {
-          id: string;
-          user_id: string;
-          week_start_date: string;
-          day_index: number;
-          meal_type: 'lunch' | 'dinner' | 'breakfast';
-          recipe_id: string | null; // Can be null if it's an event
-          event_id: string | null; // References an event
-          created_at: string;
-        };
+          color: string | null
+          created_at: string
+          day_index: number
+          event_id: string | null
+          id: string
+          meal_type: string
+          recipe_id: string | null
+          user_id: string
+          week_start_date: string
+        }
         Insert: {
-          id?: string;
-          user_id: string;
-          week_start_date: string;
-          day_index: number;
-          meal_type: 'lunch' | 'dinner' | 'breakfast';
-          recipe_id?: string | null;
-          event_id?: string | null;
-          created_at?: string;
-        };
+          color?: string | null
+          created_at?: string
+          day_index: number
+          event_id?: string | null
+          id?: string
+          meal_type: string
+          recipe_id?: string | null
+          user_id: string
+          week_start_date: string
+        }
         Update: {
-          id?: string;
-          user_id?: string;
-          week_start_date?: string;
-          day_index?: number;
-          meal_type?: 'lunch' | 'dinner' | 'breakfast';
-          recipe_id?: string | null;
-          event_id?: string | null;
-          created_at?: string;
-        };
-      };
-    };
-    Views: {};
-    Functions: {};
-    Enums: {};
-  };
+          color?: string | null
+          created_at?: string
+          day_index?: number
+          event_id?: string | null
+          id?: string
+          meal_type?: string
+          recipe_id?: string | null
+          user_id?: string
+          week_start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_plans_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meal_plans_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meal_plans_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recipes: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          links: Json | null
+          servings: number
+          tags: string[] | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          links?: Json | null
+          servings?: number
+          tags?: string[] | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          links?: Json | null
+          servings?: number
+          tags?: string[] | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      settings: {
+        Row: {
+          breakfast_enabled: boolean
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          breakfast_enabled?: boolean
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          breakfast_enabled?: boolean
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          created_at: string
+          id: string
+          last_connected_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          last_connected_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_connected_at?: string | null
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
 }
 
 // Type helpers for easier usage

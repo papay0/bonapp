@@ -135,6 +135,22 @@ export default function HomePage() {
     },
   });
 
+  // Update meal plan color mutation
+  const updateMealPlanColor = useMutation({
+    mutationFn: async ({ id, color }: { id: string; color: string | null }) => {
+      const res = await fetch(`/api/meal-plans/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ color }),
+      });
+      if (!res.ok) throw new Error('Failed to update color');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['meal-plans', weekStartISO] });
+    },
+  });
+
   // Create event mutation
   const createEvent = useMutation({
     mutationFn: async (name: string) => {
@@ -206,11 +222,11 @@ export default function HomePage() {
     if (!selectedRecipeModal) return;
 
     try {
-      // Find or create a "Cooking 👨‍🍳" event
-      let cookingEvent = events.find(e => e.name === 'Cooking 👨‍🍳');
+      // Find or create a "Cooking" event
+      let cookingEvent = events.find(e => e.name === 'Cooking');
 
       if (!cookingEvent) {
-        cookingEvent = await createEvent.mutateAsync('Cooking 👨‍🍳');
+        cookingEvent = await createEvent.mutateAsync('Cooking');
       }
 
       if (!cookingEvent) {
@@ -236,6 +252,10 @@ export default function HomePage() {
 
   const handleViewRecipe = (recipeId: string) => {
     router.push(`/home/recipes/${recipeId}`);
+  };
+
+  const handleUpdateColor = (mealPlanId: string, color: string | null) => {
+    updateMealPlanColor.mutate({ id: mealPlanId, color });
   };
 
   // Filter recipes based on search query
@@ -295,7 +315,7 @@ export default function HomePage() {
           {/* Meal Planner Table - Loading */}
           <Card className="overflow-hidden shadow-md md:shadow-lg border border-gray-200 md:border-2 p-0">
             <div className="overflow-x-auto">
-              <Table className="w-full table-fixed">
+              <Table className="w-full md:table-fixed" style={{ minWidth: '1200px' }}>
                 <TableHeader>
                   <TableRow className="bg-gradient-to-r from-emerald-100 to-amber-100 hover:from-emerald-100 hover:to-amber-100 border-b-2 border-gray-300">
                     <TableHead className="w-[60px] h-10 md:h-12 font-bold text-gray-900 border-r-2 border-gray-300 text-center align-middle text-[11px]">
@@ -364,6 +384,7 @@ export default function HomePage() {
           onAddMeal={handleAddMeal}
           onRemoveMeal={handleRemoveMeal}
           onViewRecipe={handleViewRecipe}
+          onUpdateColor={handleUpdateColor}
         />
 
       {/* Recipe/Event Selection Modal */}
@@ -399,7 +420,7 @@ export default function HomePage() {
                 options={[
                   { value: 'recipe', label: 'Recipe', icon: <ChefHat className="h-4 w-4" /> },
                   { value: 'event', label: 'Event', icon: <Calendar className="h-4 w-4" /> },
-                  { value: 'cooking', label: 'Cooking 👨‍🍳', icon: null },
+                  { value: 'cooking', label: 'Cooking', icon: null },
                 ]}
                 value={selectionMode}
                 onValueChange={(value) => {

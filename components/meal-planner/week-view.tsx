@@ -26,6 +26,7 @@ interface WeekViewProps {
   onAddMeal: (dayIndex: number, mealType: MealType) => void;
   onRemoveMeal: (mealPlanId: string) => void;
   onViewRecipe: (recipeId: string) => void;
+  onUpdateColor: (mealPlanId: string, color: string | null) => void;
 }
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -41,6 +42,7 @@ export function WeekView({
   onAddMeal,
   onRemoveMeal,
   onViewRecipe,
+  onUpdateColor,
 }: WeekViewProps) {
   const weekStart = startOfWeek(weekStartDate, { weekStartsOn: 1 });
   const weekEnd = addDays(weekStart, 6);
@@ -101,7 +103,7 @@ export function WeekView({
       {/* Calendar Table */}
       <Card className="overflow-hidden shadow-md md:shadow-lg border border-gray-200 md:border-2 p-0">
         <div className="overflow-x-auto">
-          <Table className="w-full table-fixed">
+          <Table className="w-full md:table-fixed" style={{ minWidth: '1200px' }}>
             <TableHeader>
               <TableRow className="bg-gradient-to-r from-emerald-100 to-amber-100 hover:from-emerald-100 hover:to-amber-100 border-b-2 border-gray-300">
                 <TableHead className="w-[60px] h-10 md:h-12 font-bold text-gray-900 border-r-2 border-gray-300 text-center align-middle text-[11px]">
@@ -147,6 +149,7 @@ export function WeekView({
                           onAdd={() => onAddMeal(dayIndex, mealType)}
                           onRemove={(mealPlanId) => onRemoveMeal(mealPlanId)}
                           onViewRecipe={(recipeId) => onViewRecipe(recipeId)}
+                          onUpdateColor={(mealPlanId, color) => onUpdateColor(mealPlanId, color)}
                         />
                       </TableCell>
                     );
