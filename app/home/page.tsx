@@ -68,6 +68,22 @@ export default function HomePage() {
     },
   });
 
+  // Fetch settings
+  const { data: settings, isLoading: isLoadingSettings } = useQuery<{
+    id: string;
+    user_id: string;
+    breakfast_enabled: boolean;
+    created_at: string;
+    updated_at: string;
+  }>({
+    queryKey: ['settings'],
+    queryFn: async () => {
+      const res = await fetch('/api/settings');
+      if (!res.ok) throw new Error('Failed to fetch settings');
+      return res.json();
+    },
+  });
+
   // Fetch meal plans for current week
   const { data: mealPlans = [], isLoading: isLoadingMealPlans } = useQuery<MealPlan[]>({
     queryKey: ['meal-plans', weekStartISO],
@@ -78,7 +94,7 @@ export default function HomePage() {
     },
   });
 
-  const isLoading = isLoadingRecipes || isLoadingEvents || isLoadingMealPlans;
+  const isLoading = isLoadingRecipes || isLoadingEvents || isLoadingMealPlans || isLoadingSettings;
 
   // Add meal plan mutation
   const addMealPlan = useMutation({
@@ -217,7 +233,8 @@ export default function HomePage() {
   // Calculate stats
   const totalRecipes = recipes.length;
   const mealsPlannedThisWeek = mealPlans.length;
-  const totalMealSlots = 14; // 7 days * 2 meals (lunch + dinner)
+  const mealsPerDay = settings?.breakfast_enabled ? 3 : 2; // breakfast + lunch + dinner OR lunch + dinner
+  const totalMealSlots = 7 * mealsPerDay; // 7 days * meals per day
   const completionPercentage = totalMealSlots > 0
     ? Math.round((mealsPlannedThisWeek / totalMealSlots) * 100)
     : 0;
@@ -311,7 +328,7 @@ export default function HomePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {['Lunch', 'Dinner'].map((mealType) => (
+                  {['Breakfast', 'Lunch', 'Dinner'].map((mealType) => (
                     <TableRow
                       key={mealType}
                       className="hover:bg-gray-50/50 border-b-2 last:border-b-0 border-gray-200"
@@ -402,6 +419,7 @@ export default function HomePage() {
           mealPlans={mealPlans}
           recipes={recipes}
           events={events}
+          breakfastEnabled={settings?.breakfast_enabled ?? false}
           onPreviousWeek={handlePreviousWeek}
           onNextWeek={handleNextWeek}
           onAddMeal={handleAddMeal}

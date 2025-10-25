@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChefHat, Plus, Menu, Calendar, BookOpen, Utensils, X } from 'lucide-react';
+import { ChefHat, Plus, Menu, Calendar, BookOpen, Utensils, X, Settings } from 'lucide-react';
 import { Brand } from '@/lib/brand';
 import { UserButton } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,7 @@ export function Header() {
     { href: '/home', label: 'Weekly Planner', icon: Utensils },
     { href: '/home/recipes', label: 'Recipes', icon: BookOpen },
     { href: '/home/calendar', label: 'Calendar', icon: Calendar },
+    { href: '/home/settings', label: 'Settings', icon: Settings },
   ];
 
   return (

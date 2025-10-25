@@ -20,6 +20,7 @@ interface WeekViewProps {
   mealPlans: MealPlan[];
   recipes: Recipe[];
   events: Event[];
+  breakfastEnabled?: boolean;
   onPreviousWeek: () => void;
   onNextWeek: () => void;
   onAddMeal: (dayIndex: number, mealType: MealType) => void;
@@ -28,13 +29,13 @@ interface WeekViewProps {
 }
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const MEAL_TYPES: MealType[] = ['lunch', 'dinner'];
 
 export function WeekView({
   weekStartDate,
   mealPlans,
   recipes,
   events,
+  breakfastEnabled = false,
   onPreviousWeek,
   onNextWeek,
   onAddMeal,
@@ -43,6 +44,11 @@ export function WeekView({
 }: WeekViewProps) {
   const weekStart = startOfWeek(weekStartDate, { weekStartsOn: 1 });
   const weekEnd = addDays(weekStart, 6);
+
+  // Dynamically determine meal types based on settings
+  const MEAL_TYPES: MealType[] = breakfastEnabled
+    ? ['breakfast', 'lunch', 'dinner']
+    : ['lunch', 'dinner'];
 
   const getMealPlans = (dayIndex: number, mealType: MealType) => {
     return mealPlans.filter(
