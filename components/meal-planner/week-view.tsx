@@ -21,12 +21,14 @@ interface WeekViewProps {
   recipes: Recipe[];
   events: Event[];
   breakfastEnabled?: boolean;
-  onPreviousWeek: () => void;
-  onNextWeek: () => void;
-  onAddMeal: (dayIndex: number, mealType: MealType) => void;
+  onPreviousWeek?: () => void;
+  onNextWeek?: () => void;
+  onAddMeal: (dayIndex: number, mealType: MealType, weekStart: Date) => void;
   onRemoveMeal: (mealPlanId: string) => void;
   onViewRecipe: (recipeId: string) => void;
   onUpdateColor: (mealPlanId: string, color: string | null) => void;
+  showNavigation?: boolean;
+  isCurrentWeek?: boolean;
 }
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -43,6 +45,8 @@ export function WeekView({
   onRemoveMeal,
   onViewRecipe,
   onUpdateColor,
+  showNavigation = true,
+  isCurrentWeek = false,
 }: WeekViewProps) {
   const weekStart = startOfWeek(weekStartDate, { weekStartsOn: 1 });
   const weekEnd = addDays(weekStart, 6);
@@ -75,28 +79,38 @@ export function WeekView({
   return (
     <div className="w-full space-y-2 md:space-y-3">
       {/* Week Navigator */}
-      <Card className="p-2 md:p-3 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 border-0 shadow-xl overflow-hidden relative">
+      <Card className={`p-2 md:p-3 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 shadow-xl overflow-hidden relative ${
+        isCurrentWeek ? 'border-4 border-amber-400' : 'border-0'
+      }`}>
         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
         <div className="flex items-center justify-between gap-2 relative z-10">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onPreviousWeek}
-            className="hover:bg-white/25 backdrop-blur-sm h-8 w-8 md:h-10 md:w-10 text-white hover:scale-110 transition-all"
-          >
-            <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
-          </Button>
-          <h2 className="text-sm md:text-xl font-black text-white text-center drop-shadow-md">
+          {showNavigation && onPreviousWeek ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onPreviousWeek}
+              className="hover:bg-white/25 backdrop-blur-sm h-8 w-8 md:h-10 md:w-10 text-white hover:scale-110 transition-all"
+            >
+              <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
+            </Button>
+          ) : showNavigation ? (
+            <div className="h-8 w-8 md:h-10 md:w-10" />
+          ) : null}
+          <h2 className="text-sm md:text-xl font-black text-white text-center drop-shadow-md flex-1">
             {format(weekStart, 'MMMM d')} – {format(weekEnd, 'MMMM d, yyyy')}
           </h2>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onNextWeek}
-            className="hover:bg-white/25 backdrop-blur-sm h-8 w-8 md:h-10 md:w-10 text-white hover:scale-110 transition-all"
-          >
-            <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
-          </Button>
+          {showNavigation && onNextWeek ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onNextWeek}
+              className="hover:bg-white/25 backdrop-blur-sm h-8 w-8 md:h-10 md:w-10 text-white hover:scale-110 transition-all"
+            >
+              <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
+            </Button>
+          ) : showNavigation ? (
+            <div className="h-8 w-8 md:h-10 md:w-10" />
+          ) : null}
         </div>
       </Card>
 
@@ -146,7 +160,7 @@ export function WeekView({
                           mealPlans={dayMealPlans}
                           dayName={day}
                           mealType={mealType}
-                          onAdd={() => onAddMeal(dayIndex, mealType)}
+                          onAdd={() => onAddMeal(dayIndex, mealType, weekStart)}
                           onRemove={(mealPlanId) => onRemoveMeal(mealPlanId)}
                           onViewRecipe={(recipeId) => onViewRecipe(recipeId)}
                           onUpdateColor={(mealPlanId, color) => onUpdateColor(mealPlanId, color)}

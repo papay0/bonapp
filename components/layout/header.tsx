@@ -23,7 +23,7 @@ export function Header() {
   const navItems = [
     { href: '/home', label: 'Weekly Planner', icon: Utensils },
     { href: '/home/recipes', label: 'Recipes', icon: BookOpen },
-    { href: '/home/calendar', label: 'Calendar', icon: Calendar },
+    // { href: '/home/calendar', label: 'Calendar', icon: Calendar }, // Hidden - now integrated into Weekly Planner
     { href: '/home/settings', label: 'Settings', icon: Settings },
   ];
 

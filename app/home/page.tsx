@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { WeekView } from '@/components/meal-planner/week-view';
 import { MealType, Recipe, MealPlan, Event } from '@/lib/supabase/types';
 import { getWeekStart, formatISODate } from '@/lib/utils/date';
-import { addWeeks } from 'date-fns';
+import { addWeeks, startOfWeek } from 'date-fns';
 import { ChefHat, Calendar, X, Search, Users, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
@@ -33,10 +33,12 @@ import {
 
 export default function HomePage() {
   const router = useRouter();
-  const [currentWeek, setCurrentWeek] = useState(getWeekStart());
+  const today = useMemo(() => new Date(), []);
+  const currentWeekRef = useRef<HTMLDivElement>(null);
   const [selectedRecipeModal, setSelectedRecipeModal] = useState<{
     dayIndex: number;
     mealType: MealType;
+    weekStart: Date;
   } | null>(null);
   const [recipeSearchQuery, setRecipeSearchQuery] = useState('');
   const [selectionMode, setSelectionMode] = useState<'recipe' | 'event' | 'cooking'>('recipe');
@@ -44,7 +46,19 @@ export default function HomePage() {
   const [newEventName, setNewEventName] = useState('');
 
   const queryClient = useQueryClient();
-  const weekStartISO = formatISODate(currentWeek);
+
+  // Calculate weeks to display (6 past + current + 5 future = 12 weeks)
+  const weeks = useMemo(() => {
+    const weeksArray = [];
+    const currentWeekStart = startOfWeek(today, { weekStartsOn: 1 });
+
+    for (let i = -6; i <= 5; i++) {
+      const weekStart = addWeeks(currentWeekStart, i);
+      weeksArray.push(weekStart);
+    }
+
+    return weeksArray;
+  }, [today]);
 
   // Fetch recipes
   const { data: recipes = [], isLoading: isLoadingRecipes } = useQuery<Recipe[]>({
@@ -82,11 +96,11 @@ export default function HomePage() {
     },
   });
 
-  // Fetch meal plans for current week
-  const { data: mealPlans = [], isLoading: isLoadingMealPlans } = useQuery<MealPlan[]>({
-    queryKey: ['meal-plans', weekStartISO],
+  // Fetch all meal plans
+  const { data: allMealPlans = [], isLoading: isLoadingMealPlans } = useQuery<MealPlan[]>({
+    queryKey: ['all-meal-plans'],
     queryFn: async () => {
-      const res = await fetch(`/api/meal-plans?week_start=${weekStartISO}`);
+      const res = await fetch('/api/meal-plans');
       if (!res.ok) throw new Error('Failed to fetch meal plans');
       return res.json();
     },
@@ -112,7 +126,7 @@ export default function HomePage() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['meal-plans', weekStartISO] });
+      queryClient.invalidateQueries({ queryKey: ['all-meal-plans'] });
       setSelectedRecipeModal(null);
       setSelectionMode('recipe');
       setRecipeSearchQuery('');
@@ -131,7 +145,7 @@ export default function HomePage() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['meal-plans', weekStartISO] });
+      queryClient.invalidateQueries({ queryKey: ['all-meal-plans'] });
     },
   });
 
@@ -147,7 +161,7 @@ export default function HomePage() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['meal-plans', weekStartISO] });
+      queryClient.invalidateQueries({ queryKey: ['all-meal-plans'] });
     },
   });
 
@@ -167,22 +181,14 @@ export default function HomePage() {
     },
   });
 
-  const handlePreviousWeek = () => {
-    setCurrentWeek(addWeeks(currentWeek, -1));
-  };
-
-  const handleNextWeek = () => {
-    setCurrentWeek(addWeeks(currentWeek, 1));
-  };
-
-  const handleAddMeal = (dayIndex: number, mealType: MealType) => {
-    setSelectedRecipeModal({ dayIndex, mealType });
+  const handleAddMeal = (dayIndex: number, mealType: MealType, weekStart: Date) => {
+    setSelectedRecipeModal({ dayIndex, mealType, weekStart });
   };
 
   const handleSelectRecipe = (recipeId: string) => {
     if (selectedRecipeModal) {
       addMealPlan.mutate({
-        week_start_date: weekStartISO,
+        week_start_date: formatISODate(selectedRecipeModal.weekStart),
         day_index: selectedRecipeModal.dayIndex,
         meal_type: selectedRecipeModal.mealType,
         recipe_id: recipeId,
@@ -193,7 +199,7 @@ export default function HomePage() {
   const handleSelectEvent = (eventId: string) => {
     if (selectedRecipeModal) {
       addMealPlan.mutate({
-        week_start_date: weekStartISO,
+        week_start_date: formatISODate(selectedRecipeModal.weekStart),
         day_index: selectedRecipeModal.dayIndex,
         meal_type: selectedRecipeModal.mealType,
         event_id: eventId,
@@ -208,7 +214,7 @@ export default function HomePage() {
       const event = await createEvent.mutateAsync(newEventName.trim());
       // After creating the event, add it to the meal plan
       addMealPlan.mutate({
-        week_start_date: weekStartISO,
+        week_start_date: formatISODate(selectedRecipeModal.weekStart),
         day_index: selectedRecipeModal.dayIndex,
         meal_type: selectedRecipeModal.mealType,
         event_id: event.id,
@@ -236,7 +242,7 @@ export default function HomePage() {
 
       // Add it to the meal plan
       addMealPlan.mutate({
-        week_start_date: weekStartISO,
+        week_start_date: formatISODate(selectedRecipeModal.weekStart),
         day_index: selectedRecipeModal.dayIndex,
         meal_type: selectedRecipeModal.mealType,
         event_id: cookingEvent.id,
@@ -257,6 +263,16 @@ export default function HomePage() {
   const handleUpdateColor = (mealPlanId: string, color: string | null) => {
     updateMealPlanColor.mutate({ id: mealPlanId, color });
   };
+
+  // Auto-scroll to current week on mount
+  useEffect(() => {
+    if (!isLoading && currentWeekRef.current) {
+      currentWeekRef.current.scrollIntoView({
+        behavior: 'auto',
+        block: 'center',
+      });
+    }
+  }, [isLoading]);
 
   // Filter recipes based on search query
   const filteredRecipes = recipes.filter((recipe) => {
@@ -287,75 +303,64 @@ export default function HomePage() {
           <ChefHat className="h-6 w-6 group-hover:rotate-12 transition-transform" />
         </Link>
 
-        <div className="px-4 space-y-3 md:space-y-4">
-          {/* Week Navigator - Loading */}
-          <Card className="p-2 md:p-3 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 border-0 shadow-xl overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
-            <div className="flex items-center justify-between gap-2 relative z-10">
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled
-                className="h-8 w-8 md:h-10 md:w-10 text-white"
-              >
-                <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
-              </Button>
-              <Skeleton className="h-4 md:h-5 w-48 md:w-64 bg-white/20" />
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled
-                className="h-8 w-8 md:h-10 md:w-10 text-white"
-              >
-                <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
-              </Button>
-            </div>
-          </Card>
+        <div className="px-4 space-y-4">
+          {/* Show 3 loading week skeletons */}
+          {[0, 1, 2].map((index) => (
+            <div key={index} className="space-y-2 md:space-y-3">
+              {/* Week Navigator - Loading */}
+              <Card className="p-2 md:p-3 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 border-0 shadow-xl overflow-hidden relative">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+                <div className="flex items-center justify-between gap-2 relative z-10">
+                  <Skeleton className="h-4 md:h-5 w-48 md:w-64 bg-white/20 mx-auto" />
+                </div>
+              </Card>
 
-          {/* Meal Planner Table - Loading */}
-          <Card className="overflow-hidden shadow-md md:shadow-lg border border-gray-200 md:border-2 p-0">
-            <div className="overflow-x-auto">
-              <Table className="w-full md:table-fixed" style={{ minWidth: '1200px' }}>
-                <TableHeader>
-                  <TableRow className="bg-gradient-to-r from-emerald-100 to-amber-100 hover:from-emerald-100 hover:to-amber-100 border-b-2 border-gray-300">
-                    <TableHead className="w-[60px] h-10 md:h-12 font-bold text-gray-900 border-r-2 border-gray-300 text-center align-middle text-[11px]">
-                      Meal
-                    </TableHead>
-                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => (
-                      <TableHead key={day} className="h-10 md:h-12 text-center font-bold text-gray-900 border-r-2 last:border-r-0 border-gray-300 align-middle p-0.5">
-                        <div className="flex flex-col items-center justify-center">
-                          <span className="text-[11px] font-bold">{day}</span>
-                          <Skeleton className="h-2 w-10 mt-0.5 bg-gray-300" />
-                        </div>
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {['lunch', 'dinner'].map((mealType) => (
-                    <TableRow
-                      key={mealType}
-                      className="hover:bg-gray-50/50 border-b-2 last:border-b-0 border-gray-200"
-                    >
-                      <TableCell className="font-bold text-gray-700 capitalize bg-gradient-to-r from-gray-50 to-gray-100 border-r-2 border-gray-300 text-center align-middle p-0 text-[11px]">
-                        {mealType}
-                      </TableCell>
-                      {[0, 1, 2, 3, 4, 5, 6].map((dayIndex) => (
-                        <TableCell
-                          key={`${mealType}-${dayIndex}`}
-                          className="p-1 border-r-2 last:border-r-0 border-gray-300 align-middle"
+              {/* Meal Planner Table - Loading */}
+              <Card className="overflow-hidden shadow-md md:shadow-lg border border-gray-200 md:border-2 p-0">
+                <div className="overflow-x-auto">
+                  <Table className="w-full md:table-fixed" style={{ minWidth: '1200px' }}>
+                    <TableHeader>
+                      <TableRow className="bg-gradient-to-r from-emerald-100 to-amber-100 hover:from-emerald-100 hover:to-amber-100 border-b-2 border-gray-300">
+                        <TableHead className="w-[60px] h-10 md:h-12 font-bold text-gray-900 border-r-2 border-gray-300 text-center align-middle text-[11px]">
+                          Meal
+                        </TableHead>
+                        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, dayIndex) => (
+                          <TableHead key={day} className="h-10 md:h-12 text-center font-bold text-gray-900 border-r-2 last:border-r-0 border-gray-300 align-middle p-0.5">
+                            <div className="flex flex-col items-center justify-center">
+                              <span className="text-[11px] font-bold">{day}</span>
+                              <Skeleton className="h-2 w-10 mt-0.5 bg-gray-300" />
+                            </div>
+                          </TableHead>
+                        ))}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {['lunch', 'dinner'].map((mealType) => (
+                        <TableRow
+                          key={mealType}
+                          className="hover:bg-gray-50/50 border-b-2 last:border-b-0 border-gray-200"
                         >
-                          <div className="w-full min-h-[80px] flex items-center justify-center">
-                            <Skeleton className="h-[60px] w-full rounded-md" />
-                          </div>
-                        </TableCell>
+                          <TableCell className="font-bold text-gray-700 capitalize bg-gradient-to-r from-gray-50 to-gray-100 border-r-2 border-gray-300 text-center align-middle p-0 text-[11px]">
+                            {mealType}
+                          </TableCell>
+                          {[0, 1, 2, 3, 4, 5, 6].map((dayIndex) => (
+                            <TableCell
+                              key={`${mealType}-${dayIndex}`}
+                              className="p-1 border-r-2 last:border-r-0 border-gray-300 align-middle"
+                            >
+                              <div className="w-full min-h-[80px] flex items-center justify-center">
+                                <Skeleton className="h-[60px] w-full rounded-md" />
+                              </div>
+                            </TableCell>
+                          ))}
+                        </TableRow>
                       ))}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                    </TableBody>
+                  </Table>
+                </div>
+              </Card>
             </div>
-          </Card>
+          ))}
         </div>
       </>
     );
@@ -371,21 +376,39 @@ export default function HomePage() {
         <ChefHat className="h-6 w-6 group-hover:rotate-12 transition-transform" />
       </Link>
 
-      <div className="px-4 space-y-3 md:space-y-4">
-        {/* Week View */}
-        <WeekView
-          weekStartDate={currentWeek}
-          mealPlans={mealPlans}
-          recipes={recipes}
-          events={events}
-          breakfastEnabled={settings?.breakfast_enabled ?? false}
-          onPreviousWeek={handlePreviousWeek}
-          onNextWeek={handleNextWeek}
-          onAddMeal={handleAddMeal}
-          onRemoveMeal={handleRemoveMeal}
-          onViewRecipe={handleViewRecipe}
-          onUpdateColor={handleUpdateColor}
-        />
+      <div className="px-4 space-y-4">
+        {/* Multiple Weeks View */}
+        {weeks.map((weekStart, weekIndex) => {
+          const weekStartISO = formatISODate(weekStart);
+          const currentWeekStart = startOfWeek(today, { weekStartsOn: 1 });
+          const isCurrentWeek = formatISODate(weekStart) === formatISODate(currentWeekStart);
+
+          // Filter meal plans for this specific week
+          const weekMealPlans = allMealPlans.filter(
+            (plan) => plan.week_start_date === weekStartISO
+          );
+
+          return (
+            <div
+              key={weekIndex}
+              ref={isCurrentWeek ? currentWeekRef : null}
+            >
+              <WeekView
+                weekStartDate={weekStart}
+                mealPlans={weekMealPlans}
+                recipes={recipes}
+                events={events}
+                breakfastEnabled={settings?.breakfast_enabled ?? false}
+                showNavigation={false}
+                isCurrentWeek={isCurrentWeek}
+                onAddMeal={handleAddMeal}
+                onRemoveMeal={handleRemoveMeal}
+                onViewRecipe={handleViewRecipe}
+                onUpdateColor={handleUpdateColor}
+              />
+            </div>
+          );
+        })}
 
       {/* Recipe/Event Selection Modal */}
       <Dialog open={!!selectedRecipeModal} onOpenChange={(open) => {
