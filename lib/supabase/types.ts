@@ -43,6 +43,36 @@ export type Database = {
           },
         ]
       }
+      grocery_lists: {
+        Row: {
+          created_at: string
+          id: string
+          items: Json
+          name: string
+          updated_at: string
+          user_id: string
+          week_start_date: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          items?: Json
+          name: string
+          updated_at?: string
+          user_id: string
+          week_start_date?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          items?: Json
+          name?: string
+          updated_at?: string
+          user_id?: string
+          week_start_date?: string | null
+        }
+        Relationships: []
+      }
       meal_plans: {
         Row: {
           color: string | null
@@ -213,16 +243,19 @@ export type User = Database['public']['Tables']['users']['Row'];
 export type Recipe = Database['public']['Tables']['recipes']['Row'];
 export type Event = Database['public']['Tables']['events']['Row'];
 export type MealPlan = Database['public']['Tables']['meal_plans']['Row'];
+export type GroceryList = Database['public']['Tables']['grocery_lists']['Row'];
 
 export type InsertUser = Database['public']['Tables']['users']['Insert'];
 export type InsertRecipe = Database['public']['Tables']['recipes']['Insert'];
 export type InsertEvent = Database['public']['Tables']['events']['Insert'];
 export type InsertMealPlan = Database['public']['Tables']['meal_plans']['Insert'];
+export type InsertGroceryList = Database['public']['Tables']['grocery_lists']['Insert'];
 
 export type UpdateUser = Database['public']['Tables']['users']['Update'];
 export type UpdateRecipe = Database['public']['Tables']['recipes']['Update'];
 export type UpdateEvent = Database['public']['Tables']['events']['Update'];
 export type UpdateMealPlan = Database['public']['Tables']['meal_plans']['Update'];
+export type UpdateGroceryList = Database['public']['Tables']['grocery_lists']['Update'];
 
 // Additional helper types
 export type MealType = 'lunch' | 'dinner' | 'breakfast';
@@ -230,4 +263,14 @@ export type MealType = 'lunch' | 'dinner' | 'breakfast';
 export interface RecipeLink {
   url: string;
   title?: string;
+}
+
+export interface GroceryListItem {
+  text: string;
+  checked: boolean;
+}
+
+export interface GroceryListCategory {
+  name: string;
+  items: GroceryListItem[];
 }

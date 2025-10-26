@@ -2,10 +2,12 @@
 
 import { Recipe, MealPlan, MealType, Event } from '@/lib/supabase/types';
 import { MealCell } from './meal-cell';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ShoppingCart } from 'lucide-react';
 import { format, startOfWeek, addDays } from 'date-fns';
+import { formatISODate } from '@/lib/utils/date';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import Link from 'next/link';
 import {
   Table,
   TableBody,
@@ -99,6 +101,17 @@ export function WeekView({
           <h2 className="text-sm md:text-xl font-black text-white text-center drop-shadow-md flex-1">
             {format(weekStart, 'MMMM d')} – {format(weekEnd, 'MMMM d, yyyy')}
           </h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="hover:bg-white/25 backdrop-blur-sm text-white hover:text-white gap-1.5 md:gap-2 h-8 md:h-10 px-2 md:px-3"
+          >
+            <Link href={`/home/grocery-list?week=${formatISODate(weekStart)}`}>
+              <ShoppingCart className="h-3.5 w-3.5 md:h-4 md:w-4" />
+              <span className="text-xs md:text-sm font-semibold">Grocery List</span>
+            </Link>
+          </Button>
           {showNavigation && onNextWeek ? (
             <Button
               variant="ghost"
