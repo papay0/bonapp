@@ -35,6 +35,7 @@ export default function HomePage() {
   const router = useRouter();
   const today = useMemo(() => new Date(), []);
   const currentWeekRef = useRef<HTMLDivElement>(null);
+  const [currentWeekStart, setCurrentWeekStart] = useState(() => startOfWeek(today, { weekStartsOn: 1 }));
   const [selectedRecipeModal, setSelectedRecipeModal] = useState<{
     dayIndex: number;
     mealType: MealType;
@@ -85,6 +86,7 @@ export default function HomePage() {
     id: string;
     user_id: string;
     breakfast_enabled: boolean;
+    multi_week_view: boolean;
     created_at: string;
     updated_at: string;
   }>({
@@ -264,15 +266,24 @@ export default function HomePage() {
     updateMealPlanColor.mutate({ id: mealPlanId, color });
   };
 
-  // Auto-scroll to current week on mount
+  // Navigation for single-week view
+  const handlePreviousWeek = () => {
+    setCurrentWeekStart(prev => addWeeks(prev, -1));
+  };
+
+  const handleNextWeek = () => {
+    setCurrentWeekStart(prev => addWeeks(prev, 1));
+  };
+
+  // Auto-scroll to current week on mount (multi-week view only)
   useEffect(() => {
-    if (!isLoading && currentWeekRef.current) {
+    if (!isLoading && settings?.multi_week_view && currentWeekRef.current) {
       currentWeekRef.current.scrollIntoView({
         behavior: 'auto',
         block: 'center',
       });
     }
-  }, [isLoading]);
+  }, [isLoading, settings?.multi_week_view]);
 
   // Filter recipes based on search query
   const filteredRecipes = recipes.filter((recipe) => {
@@ -377,38 +388,72 @@ export default function HomePage() {
       </Link>
 
       <div className="px-4 space-y-4">
-        {/* Multiple Weeks View */}
-        {weeks.map((weekStart, weekIndex) => {
-          const weekStartISO = formatISODate(weekStart);
-          const currentWeekStart = startOfWeek(today, { weekStartsOn: 1 });
-          const isCurrentWeek = formatISODate(weekStart) === formatISODate(currentWeekStart);
+        {settings?.multi_week_view ? (
+          // Multiple Weeks View
+          weeks.map((weekStart, weekIndex) => {
+            const weekStartISO = formatISODate(weekStart);
+            const todayWeekStart = startOfWeek(today, { weekStartsOn: 1 });
+            const isCurrentWeek = formatISODate(weekStart) === formatISODate(todayWeekStart);
 
-          // Filter meal plans for this specific week
-          const weekMealPlans = allMealPlans.filter(
-            (plan) => plan.week_start_date === weekStartISO
-          );
+            // Filter meal plans for this specific week
+            const weekMealPlans = allMealPlans.filter(
+              (plan) => plan.week_start_date === weekStartISO
+            );
 
-          return (
-            <div
-              key={weekIndex}
-              ref={isCurrentWeek ? currentWeekRef : null}
-            >
+            return (
+              <div
+                key={weekIndex}
+                ref={isCurrentWeek ? currentWeekRef : null}
+              >
+                <WeekView
+                  weekStartDate={weekStart}
+                  mealPlans={weekMealPlans}
+                  recipes={recipes}
+                  events={events}
+                  breakfastEnabled={settings?.breakfast_enabled ?? false}
+                  showNavigation={false}
+                  isCurrentWeek={isCurrentWeek}
+                  multiWeekView={true}
+                  onAddMeal={handleAddMeal}
+                  onRemoveMeal={handleRemoveMeal}
+                  onViewRecipe={handleViewRecipe}
+                  onUpdateColor={handleUpdateColor}
+                />
+              </div>
+            );
+          })
+        ) : (
+          // Single Week View with Navigation
+          (() => {
+            const weekStartISO = formatISODate(currentWeekStart);
+            const todayWeekStart = startOfWeek(today, { weekStartsOn: 1 });
+            const isCurrentWeek = formatISODate(currentWeekStart) === formatISODate(todayWeekStart);
+
+            // Filter meal plans for current week
+            const weekMealPlans = allMealPlans.filter(
+              (plan) => plan.week_start_date === weekStartISO
+            );
+
+            return (
               <WeekView
-                weekStartDate={weekStart}
+                weekStartDate={currentWeekStart}
                 mealPlans={weekMealPlans}
                 recipes={recipes}
                 events={events}
                 breakfastEnabled={settings?.breakfast_enabled ?? false}
-                showNavigation={false}
+                showNavigation={true}
                 isCurrentWeek={isCurrentWeek}
+                multiWeekView={false}
+                onPreviousWeek={handlePreviousWeek}
+                onNextWeek={handleNextWeek}
                 onAddMeal={handleAddMeal}
                 onRemoveMeal={handleRemoveMeal}
                 onViewRecipe={handleViewRecipe}
                 onUpdateColor={handleUpdateColor}
               />
-            </div>
-          );
-        })}
+            );
+          })()
+        )}
 
       {/* Recipe/Event Selection Modal */}
       <Dialog open={!!selectedRecipeModal} onOpenChange={(open) => {

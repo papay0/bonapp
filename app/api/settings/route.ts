@@ -25,6 +25,7 @@ export async function GET() {
         .insert({
           user_id: userId,
           breakfast_enabled: false,
+          multi_week_view: false,
         })
         .select()
         .single();
@@ -57,10 +58,11 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { breakfast_enabled } = body;
+    const { breakfast_enabled, multi_week_view } = body;
 
     const updates: any = {};
     if (breakfast_enabled !== undefined) updates.breakfast_enabled = breakfast_enabled;
+    if (multi_week_view !== undefined) updates.multi_week_view = multi_week_view;
 
     const { data: settings, error } = await (supabaseServer as any)
       .from('settings')

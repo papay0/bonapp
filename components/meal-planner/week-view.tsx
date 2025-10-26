@@ -31,6 +31,7 @@ interface WeekViewProps {
   onUpdateColor: (mealPlanId: string, color: string | null) => void;
   showNavigation?: boolean;
   isCurrentWeek?: boolean;
+  multiWeekView?: boolean;
 }
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -49,6 +50,7 @@ export function WeekView({
   onUpdateColor,
   showNavigation = true,
   isCurrentWeek = false,
+  multiWeekView = false,
 }: WeekViewProps) {
   const weekStart = startOfWeek(weekStartDate, { weekStartsOn: 1 });
   const weekEnd = addDays(weekStart, 6);
@@ -82,7 +84,7 @@ export function WeekView({
     <div className="w-full space-y-2 md:space-y-3">
       {/* Week Navigator */}
       <Card className={`p-2 md:p-3 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 shadow-xl overflow-hidden relative ${
-        isCurrentWeek ? 'border-4 border-amber-400' : 'border-0'
+        isCurrentWeek && multiWeekView ? 'border-4 border-amber-400' : 'border-0'
       }`}>
         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
         <div className="flex items-center justify-between gap-2 relative z-10">

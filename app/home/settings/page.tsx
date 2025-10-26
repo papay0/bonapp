@@ -5,12 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Settings as SettingsIcon, Coffee } from 'lucide-react';
+import { Settings as SettingsIcon, Coffee, Calendar } from 'lucide-react';
 
 type Settings = {
   id: string;
   user_id: string;
   breakfast_enabled: boolean;
+  multi_week_view: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -46,6 +47,10 @@ export default function SettingsPage() {
 
   const handleBreakfastToggle = (enabled: boolean) => {
     updateSettings.mutate({ breakfast_enabled: enabled });
+  };
+
+  const handleMultiWeekViewToggle = (enabled: boolean) => {
+    updateSettings.mutate({ multi_week_view: enabled });
   };
 
   if (isLoading) {
@@ -112,6 +117,36 @@ export default function SettingsPage() {
               id="breakfast-toggle"
               checked={settings?.breakfast_enabled ?? false}
               onCheckedChange={handleBreakfastToggle}
+              disabled={updateSettings.isPending}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-blue-600" />
+            Week View
+          </CardTitle>
+          <CardDescription>
+            Choose how you want to view your weekly planner
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label htmlFor="multi-week-toggle" className="text-base font-medium">
+                Show all weeks
+              </Label>
+              <p className="text-sm text-gray-500">
+                View multiple weeks at once in a scrollable list, or show one week at a time with navigation buttons
+              </p>
+            </div>
+            <Switch
+              id="multi-week-toggle"
+              checked={settings?.multi_week_view ?? false}
+              onCheckedChange={handleMultiWeekViewToggle}
               disabled={updateSettings.isPending}
             />
           </div>

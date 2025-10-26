@@ -177,6 +177,7 @@ export type Database = {
           breakfast_enabled: boolean
           created_at: string
           id: string
+          multi_week_view: boolean
           updated_at: string
           user_id: string
         }
@@ -184,6 +185,7 @@ export type Database = {
           breakfast_enabled?: boolean
           created_at?: string
           id?: string
+          multi_week_view?: boolean
           updated_at?: string
           user_id: string
         }
@@ -191,6 +193,7 @@ export type Database = {
           breakfast_enabled?: boolean
           created_at?: string
           id?: string
+          multi_week_view?: boolean
           updated_at?: string
           user_id?: string
         }
